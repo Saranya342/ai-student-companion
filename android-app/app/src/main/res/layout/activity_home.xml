@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:background="#0D0D0D">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical"
+        android:background="#1A1A1A">
+
+        <ImageView
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/robot"
+            android:scaleType="centerCrop"
+            android:background="@drawable/circle_purple"
+            android:padding="4dp"
+            android:layout_marginEnd="12dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Study Buddy"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="● Online"
+                android:textColor="#69F0AE"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Chat Messages -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMessages"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp"
+        android:clipToPadding="false"/>
+
+    <!-- Quick chips -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/chipRemind"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⏰ Remind me"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:padding="10dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_dark"/>
+
+            <TextView
+                android:id="@+id/chipStressed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="😣 I feel stressed"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:padding="10dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_dark"/>
+
+            <TextView
+                android:id="@+id/chipPlan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📅 Plan my day"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:padding="10dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_dark"/>
+
+            <TextView
+                android:id="@+id/chipBag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎒 What to carry?"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:padding="10dp"
+                android:background="@drawable/chip_dark"/>
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <!-- Message Input -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="#1A1A1A">
+
+        <EditText
+            android:id="@+id/etMessage"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:hint="Type a message..."
+            android:textColor="#FFFFFF"
+            android:textColorHint="#555555"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="@drawable/edittext_dark"
+            android:layout_marginEnd="8dp"
+            android:imeOptions="actionSend"
+            android:inputType="textMultiLine"/>
+
+        <Button
+            android:id="@+id/btnSend"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="➤"
+            android:textSize="18sp"
+            android:padding="0dp"
+            android:backgroundTint="#7C4DFF"/>
+
+    </LinearLayout>
+
+    <!-- Bottom Navigation -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:orientation="horizontal"
+        android:background="#1A1A1A"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/navChat"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="💬&#10;Chat"
+            android:textColor="#B388FF"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/navPlanner"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="📅&#10;Planner"
+            android:textColor="#555555"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/navBag"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="🎒&#10;Bag"
+            android:textColor="#555555"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/navMemories"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="✨&#10;Memories"
+            android:textColor="#555555"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:padding="8dp"/>
+
+        <TextView
+            android:id="@+id/navProfile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="👤&#10;Profile"
+            android:textColor="#555555"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:padding="8dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>
