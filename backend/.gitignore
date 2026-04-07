@@ -1,0 +1,21 @@
+# Sensitive files
+.env
+
+# Database
+chroma_db/
+*.sqlite3
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
