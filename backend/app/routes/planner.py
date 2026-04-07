@@ -5,10 +5,13 @@ from app.database.connection import SessionLocal
 from app.database import models
 from app.routes.auth import get_current_user
 import requests
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 router = APIRouter()
 
-GROQ_API_KEY = "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"  # ← same key as chat.py
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_MODEL = "llama-3.3-70b-versatile"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 

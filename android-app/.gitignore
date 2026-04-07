@@ -10,6 +10,10 @@
 .DS_Store
 /build
 /captures
+.env
 .externalNativeBuild
 .cxx
 local.properties
+__pycache__/
+*.pyc
+chroma_db/
