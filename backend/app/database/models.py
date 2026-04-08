@@ -15,8 +15,9 @@ class User(Base):
     chats = relationship("Chat", back_populates="user")
     bag_items = relationship("BagItem", back_populates="user")
     tasks = relationship("Task", back_populates="user")
-    memories = relationship("Memory", back_populates="user")  # NEW
+    memories = relationship("Memory", back_populates="user")
     notifications = relationship("Notification", back_populates="user")
+
 
 class Chat(Base):
     __tablename__ = "chats"
@@ -53,27 +54,29 @@ class Task(Base):
     user = relationship("User", back_populates="tasks")
 
 
-# NEW MODEL FOR RAG
 class Memory(Base):
     __tablename__ = "memories"
 
     id = Column(Integer, primary_key=True, index=True)
     content = Column(Text, nullable=False)
-    category = Column(String, nullable=False)  # "chat", "note", "achievement", "task"
-    embedding_id = Column(String, unique=True, nullable=False)
+    category = Column(String, nullable=False)
+    embedding_id = Column(String, unique=True, nullable=True)  # nullable now
+    mood = Column(String, nullable=True)          # NEW for thoughts
+    unlock_date = Column(String, nullable=True)   # NEW for future letters
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="memories")
+
+
 class Notification(Base):
     __tablename__ = "notifications"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     message = Column(Text, nullable=False)
-    type = Column(String, nullable=False)  # e.g., "task", "bag", "exam"
-    priority = Column(String, default="normal")  # "urgent", "high", "normal"
+    type = Column(String, nullable=False)
+    priority = Column(String, default="normal")
     is_read = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user_id = Column(Integer, ForeignKey("users.id"))
-
     user = relationship("User", back_populates="notifications")
