@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from app.database.connection import SessionLocal
 from app.database import models
 from app.routes.auth import get_current_user
-from app.agents.memory_agent import memory_agent
+from app.agents.memory_action_agent import memory_action_agent
 import requests
 import os
 from dotenv import load_dotenv

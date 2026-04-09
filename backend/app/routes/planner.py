@@ -192,6 +192,39 @@ def complete_task(
 
         task.is_completed = True
         db.commit()
+        completed_today = db.query(models.Task).filter(
+            models.Task.user_id == current_user.id,
+            models.Task.is_completed == True,
+            models.Task.completed_at >= datetime.utcnow().date()
+        ).count()
+        
+        # Milestone: Completed 5 tasks in one day
+        if completed_today == 5:
+            motivational_memory = models.MotivationalMemory(
+                user_id=current_user.id,
+                content="Completed 5 tasks in a row! 🎉",
+                emoji="🎉",
+                memory_type="milestone"
+            )
+            db.add(motivational_memory)
+            db.commit()
+        
+        # Milestone: All tasks for today completed
+        pending_today = db.query(models.Task).filter(
+            models.Task.user_id == current_user.id,
+            models.Task.is_completed == False,
+            models.Task.due_date == str(datetime.utcnow().date())
+        ).count()
+        
+        if pending_today == 0:
+            motivational_memory = models.MotivationalMemory(
+                user_id=current_user.id,
+                content="All tasks for today completed! 💪",
+                emoji="💪",
+                memory_type="milestone"
+            )
+            db.add(motivational_memory)
+            db.commit()
 
         return {
             "message": f"'{task.title}' marked as complete 🎉",

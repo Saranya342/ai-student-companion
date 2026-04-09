@@ -4,7 +4,7 @@ from app.database import models
 from app.api import users
 from app.routes import chat, bag, planner, memory, notifications
 from app.services.scheduler import start_scheduler
-
+from app.routes import chat, bag, planner, memory, agent_chat, profile 
 app = FastAPI(
     title="MindMate AI Backend",
     description="Gen-Z AI Student Companion with RAG",
@@ -21,7 +21,9 @@ app.include_router(bag.router, prefix="/bag", tags=["Bag Checker"])
 app.include_router(planner.router, prefix="/planner", tags=["Planner"])
 app.include_router(memory.router, prefix="/memory", tags=["Memory & RAG"])
 app.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
-
+app.include_router(profile.router, prefix="/profile", tags=["👤 Profile"])
+from app.routes import chat, bag, planner, memory, agent_chat
+app.include_router(agent_chat.router, prefix="/chat", tags=["💬 Multi-Agent Chat"])
 @app.get("/")
 def home():
     return {

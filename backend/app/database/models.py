@@ -17,7 +17,8 @@ class User(Base):
     tasks = relationship("Task", back_populates="user")
     memories = relationship("Memory", back_populates="user")
     notifications = relationship("Notification", back_populates="user")
-
+    streaks = relationship("Streak", back_populates="user")  # ADD THIS
+    motivational_memories = relationship("MotivationalMemory", back_populates="user")  # ADD THIS
 
 class Chat(Base):
     __tablename__ = "chats"
@@ -61,8 +62,6 @@ class Memory(Base):
     content = Column(Text, nullable=False)
     category = Column(String, nullable=False)
     embedding_id = Column(String, unique=True, nullable=True)  # nullable now
-    mood = Column(String, nullable=True)          # NEW for thoughts
-    unlock_date = Column(String, nullable=True)   # NEW for future letters
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="memories")
@@ -80,3 +79,30 @@ class Notification(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="notifications")
+
+# Add to existing models.py
+
+class Streak(Base):
+    __tablename__ = "streaks"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    streak_type = Column(String, nullable=False)  # "daily_highfive", "journal", "task"
+    current_streak = Column(Integer, default=0)
+    longest_streak = Column(Integer, default=0)
+    last_activity_date = Column(DateTime(timezone=True))
+    
+    user = relationship("User", back_populates="streaks")
+
+
+class MotivationalMemory(Base):
+    __tablename__ = "motivational_memories"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    emoji = Column(String)  # "🎉", "🔥", "📚"
+    memory_type = Column(String)  # "achievement", "milestone", "streak_unlock"
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    user = relationship("User", back_populates="motivational_memories")
