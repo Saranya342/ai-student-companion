@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/card_dark"
+    android:padding="16dp"
+    android:layout_marginBottom="12dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp">
+
+    <!-- Top Row: Category + Date -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvMemoryEmoji"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🏆"
+            android:textSize="18sp"
+            android:layout_marginEnd="8dp"/>
+
+        <TextView
+            android:id="@+id/tvMemoryCategory"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="WIN"
+            android:textColor="#FFD700"
+            android:textSize="11sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tvMemoryDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Apr 8"
+            android:textColor="#555555"
+            android:textSize="11sp"/>
+
+    </LinearLayout>
+
+    <!-- Memory Content -->
+    <TextView
+        android:id="@+id/tvMemoryContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:lineSpacingExtra="4dp"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Bottom Row: Share + Delete -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <TextView
+            android:id="@+id/btnShareMemory"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="📤 Share"
+            android:textColor="#B388FF"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:background="@drawable/chip_dark"
+            android:layout_marginEnd="8dp"/>
+
+        <TextView
+            android:id="@+id/btnDeleteMemory"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="🗑 Delete"
+            android:textColor="#FF5252"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:background="@drawable/chip_dark"/>
+
+    </LinearLayout>
+
+</LinearLayout>

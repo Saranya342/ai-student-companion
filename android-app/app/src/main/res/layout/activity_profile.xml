@@ -5,46 +5,51 @@
     android:orientation="vertical"
     android:background="#0D0D0D">
 
+    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:background="#111111">
 
         <ImageView
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:src="@drawable/robot"
             android:scaleType="centerCrop"
             android:background="@drawable/circle_purple"
             android:padding="4dp"
-            android:layout_marginEnd="16dp"/>
+            android:layout_marginEnd="12dp"/>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/tvStudentName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Hey, Student! 👋"
                 android:textColor="#FFFFFF"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Your space to think and dream"
+                android:text="Your mind space 🌌"
                 android:textColor="#888888"
-                android:textSize="13sp"/>
+                android:textSize="12sp"/>
 
         </LinearLayout>
 
     </LinearLayout>
 
+    <!-- Tab Switcher -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -56,7 +61,7 @@
             android:layout_width="0dp"
             android:layout_height="44dp"
             android:layout_weight="1"
-            android:text="🌀 Thought Parking"
+            android:text="🧠 Mind Garage"
             android:textColor="#FFFFFF"
             android:textSize="13sp"
             android:gravity="center"
@@ -68,7 +73,7 @@
             android:layout_width="0dp"
             android:layout_height="44dp"
             android:layout_weight="1"
-            android:text="🕐 Future You"
+            android:text="🚀 Time Capsule"
             android:textColor="#FFFFFF"
             android:textSize="13sp"
             android:gravity="center"
@@ -76,47 +81,354 @@
 
     </LinearLayout>
 
+    <!-- THOUGHT PARKING - Mind Garage -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="16dp"
-        android:gravity="center_vertical">
-
-        <EditText
-            android:id="@+id/etThought"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:hint="Park a thought here..."
-            android:textColor="#FFFFFF"
-            android:textColorHint="#555555"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:background="@drawable/edittext_dark"
-            android:layout_marginEnd="8dp"/>
-
-        <Button
-            android:id="@+id/btnPark"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:text="➤"
-            android:textSize="16sp"
-            android:padding="0dp"
-            android:backgroundTint="#7C4DFF"/>
-
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvThoughts"
+        android:id="@+id/thoughtLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="16dp"
-        android:clipToPadding="false"/>
+        android:orientation="vertical">
 
+        <!-- Mood selector -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp">
+
+            <LinearLayout
+                android:id="@+id/moodContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/moodFrustrated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="😤 Frustrated"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/chip_dark"/>
+
+                <TextView
+                    android:id="@+id/moodCurious"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="💭 Curious"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/chip_dark"/>
+
+                <TextView
+                    android:id="@+id/moodHappy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="😊 Happy"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/chip_dark"/>
+
+                <TextView
+                    android:id="@+id/moodAnxious"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="😰 Anxious"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/chip_dark"/>
+
+                <TextView
+                    android:id="@+id/moodIdea"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="💡 Idea"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/chip_dark"/>
+
+                <TextView
+                    android:id="@+id/moodMotivated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="🔥 Motivated"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:background="@drawable/chip_dark"/>
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
+
+        <!-- Input -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp"
+            android:gravity="center_vertical">
+
+            <EditText
+                android:id="@+id/etThought"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:hint="Drop a thought here... 🧠"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#555555"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="@drawable/edittext_dark"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnPark"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:text="➤"
+                android:textSize="16sp"
+                android:padding="0dp"
+                android:backgroundTint="#7C4DFF"/>
+
+        </LinearLayout>
+
+        <!-- Thoughts count -->
+        <TextView
+            android:id="@+id/tvThoughtCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="YOUR PARKED THOUGHTS"
+            android:textColor="#555555"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingStart="16dp"
+            android:paddingBottom="8dp"/>
+
+        <!-- Thoughts list -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:id="@+id/thoughtContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"/>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+    <!-- FUTURE YOU - Time Capsule -->
+    <LinearLayout
+        android:id="@+id/futureLayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <!-- Write letter section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="#111111"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💌 Dear Future Me..."
+                android:textColor="#B388FF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <EditText
+                android:id="@+id/etFutureLetter"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:hint="Write something your future self needs to hear..."
+                android:textColor="#FFFFFF"
+                android:textColorHint="#555555"
+                android:padding="12dp"
+                android:gravity="top"
+                android:background="@drawable/edittext_dark"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Unlock timer options -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔒 Seal until..."
+                android:textColor="#888888"
+                android:textSize="12sp"
+                android:layout_marginBottom="8dp"/>
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/timer1Week"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="1 Week"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:gravity="center"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/chip_purple"/>
+
+                    <TextView
+                        android:id="@+id/timer1Month"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="1 Month"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:gravity="center"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/chip_dark"/>
+
+                    <TextView
+                        android:id="@+id/timer3Months"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="3 Months"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:gravity="center"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/chip_dark"/>
+
+                    <TextView
+                        android:id="@+id/timer1Year"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="1 Year"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:gravity="center"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="@drawable/chip_dark"/>
+
+                    <TextView
+                        android:id="@+id/timerCustom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="📅 Custom"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:gravity="center"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:background="@drawable/chip_dark"/>
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
+            <Button
+                android:id="@+id/btnSendLetter"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="🚀 Seal &amp; Send to Future Me"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:backgroundTint="#3D1B6E"/>
+
+        </LinearLayout>
+
+        <!-- Letters list -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TIME CAPSULES"
+            android:textColor="#555555"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingStart="16dp"
+            android:paddingBottom="8dp"/>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:id="@+id/futureContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"/>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+    <!-- Logout -->
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="🚪 Logout"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:backgroundTint="#FF5252"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Bottom Navigation -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="72dp"
