@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@drawable/card_dark"
+    android:padding="16dp"
+    android:gravity="center_vertical"
+    android:layout_marginBottom="10dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp">
+
+    <!-- Item Emoji -->
+    <TextView
+        android:id="@+id/tvItemEmoji"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:text="📦"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:background="@drawable/circle_purple"
+        android:layout_marginEnd="12dp"/>
+
+    <!-- Item Info -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvBagItemName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tvItemCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#888888"
+            android:textSize="11sp"/>
+
+    </LinearLayout>
+
+    <!-- Delete Button -->
+    <TextView
+        android:id="@+id/btnDeleteItem"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:text="🗑"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_marginEnd="8dp"/>
+
+    <!-- Checkbox -->
+    <CheckBox
+        android:id="@+id/checkBagItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:buttonTint="#7C4DFF"/>
+
+</LinearLayout>
