@@ -10,6 +10,7 @@ import requests
 import os
 from dotenv import load_dotenv
 import logging
+from datetime import datetime
 
 load_dotenv()
 
@@ -26,7 +27,7 @@ class ChatRequest(BaseModel):
     message: str
 
 
-def build_agent_prompt(message: str, agent_results: dict) -> str:
+def build_agent_prompt(message: str, agent_results: dict, bag_suggestions: list = None) -> str:
     """Build enhanced prompt using all agent insights"""
     
     emotion = agent_results['emotion_data']
@@ -67,16 +68,27 @@ def build_agent_prompt(message: str, agent_results: dict) -> str:
     if agent_results.get('procrastination_data', {}).get('is_procrastinating'):
         system_prompt += f"\n**User is procrastinating:** {agent_results.get('motivational_nudge', '')}\n"
     
+    # Add thought parking acknowledgment
+    if agent_results['actions']['should_save_to_journal']:
+        system_prompt += "\n**User shared a random thought/reminder - acknowledge it casually**\n"
+    
+    # Add bag check suggestions
+    if bag_suggestions and len(bag_suggestions) > 0:
+        day = bag_suggestions[0]['day']
+        items_text = ", ".join(bag_suggestions[0]['items'])
+        system_prompt += f"\n**Bag reminder for {day}:** Don't forget to pack: {items_text}\n"
+        system_prompt += "- Mention the bag items casually in your response\n"
+    
     system_prompt += f"\n**User Message:** {message}\n\n"
     system_prompt += "Respond naturally, empathetically, and incorporate the insights above smoothly. Keep it short (2-3 sentences unless explaining)."
     
     return system_prompt
 
 
-def generate_response(message: str, agent_results: dict) -> str:
+def generate_response(message: str, agent_results: dict, bag_suggestions: list = None) -> str:
     """Generate AI response using Groq"""
     
-    system_prompt = build_agent_prompt(message, agent_results)
+    system_prompt = build_agent_prompt(message, agent_results, bag_suggestions)
     
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
@@ -129,8 +141,65 @@ def agent_chat(
         # Step 1: Route to agents
         agent_results = orchestrator.route(current_user.id, req.message, db)
         
-        # Step 2: Generate AI response
-        response = generate_response(req.message, agent_results)
+        # Step 1.5: Auto-suggest bag items if needed
+        bag_suggestions = []
+        if agent_results['actions']['should_check_bag']:
+            message_lower = req.message.lower()
+            days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+            detected_day = None
+            
+            # Detect day from message
+            for day in days:
+                if day in message_lower:
+                    detected_day = day.capitalize()
+                    break
+            
+            # If "tomorrow" is mentioned
+            if not detected_day and "tomorrow" in message_lower:
+                tomorrow_idx = (datetime.now().weekday() + 1) % 7
+                detected_day = days[tomorrow_idx].capitalize()
+            
+            # If "today" is mentioned
+            if not detected_day and "today" in message_lower:
+                today_idx = datetime.now().weekday()
+                detected_day = days[today_idx].capitalize()
+            
+            if detected_day:
+                # Get or create bag items for that day
+                items = db.query(models.BagItem).filter(
+                    models.BagItem.user_id == current_user.id,
+                    models.BagItem.day == detected_day
+                ).all()
+                
+                # Create defaults if none exist
+                if not items:
+                    from app.routes.bag import DEFAULT_ITEMS
+                    if detected_day in DEFAULT_ITEMS:
+                        for item_name in DEFAULT_ITEMS[detected_day]:
+                            new_item = models.BagItem(
+                                day=detected_day,
+                                item_name=item_name,
+                                is_checked="false",
+                                user_id=current_user.id
+                            )
+                            db.add(new_item)
+                        db.commit()
+                        
+                        # Reload items
+                        items = db.query(models.BagItem).filter(
+                            models.BagItem.user_id == current_user.id,
+                            models.BagItem.day == detected_day
+                        ).all()
+                
+                if items:
+                    bag_suggestions = [{
+                        "day": detected_day,
+                        "items": [i.item_name for i in items]
+                    }]
+                    logger.info(f"🎒 Suggested {len(items)} bag items for {detected_day}")
+        
+        # Step 2: Generate AI response (with bag suggestions)
+        response = generate_response(req.message, agent_results, bag_suggestions)
         
         # Step 3: Save chat to database
         new_chat = models.Chat(
@@ -141,21 +210,19 @@ def agent_chat(
         db.add(new_chat)
         db.commit()
         
-        # Step 4: Save to memory
+        # Step 4: Save to memory (RAG)
         memory_action_agent.add_chat_memory(db, current_user.id, req.message, response)
         
         # Step 5: Auto-add tasks to planner (if extracted)
         tasks_added = 0
         if agent_results['tasks']:
             tasks_added = task_intelligence_agent.add_to_planner(db, current_user.id, agent_results['tasks'])
+            logger.info(f"📋 Auto-added {tasks_added} tasks to planner")
         
-        # Step 6: Save achievement if mentioned
         # Step 6: Auto-save achievement to motivational memories
         if agent_results['actions']['is_achievement']:
-    # Extract the achievement content
             achievement_content = req.message
-    
-    # Auto-create motivational memory
+            
             motivational_memory = models.MotivationalMemory(
                 user_id=current_user.id,
                 content=achievement_content,
@@ -164,8 +231,20 @@ def agent_chat(
             )
             db.add(motivational_memory)
             db.commit()
-    
+            
             logger.info(f"✨ Auto-saved achievement to motivational memories")
+        
+        # Step 7: Auto-save thought parking to journal
+        if agent_results['actions']['should_save_to_journal']:
+            journal_entry = models.JournalEntry(
+                user_id=current_user.id,
+                content=req.message,
+                entry_type="thought_parking"
+            )
+            db.add(journal_entry)
+            db.commit()
+            
+            logger.info(f"📝 Auto-saved thought parking to journal")
         
         logger.info(f"✅ Agent chat complete. {len(agent_results['agents_used'])} agents used")
         
@@ -177,7 +256,12 @@ def agent_chat(
             "tasks_extracted": len(agent_results['tasks']),
             "tasks_added_to_planner": tasks_added,
             "micro_tasks_generated": len(agent_results['micro_tasks']['micro_tasks']) if agent_results['micro_tasks'] else 0,
-            "actions_triggered": agent_results['actions']
+            "bag_suggestions": bag_suggestions,
+            "actions_triggered": {
+                "bag_check": agent_results['actions']['should_check_bag'],
+                "journal_saved": agent_results['actions']['should_save_to_journal'],
+                "achievement_saved": agent_results['actions']['is_achievement']
+            }
         }
         
     except Exception as e:

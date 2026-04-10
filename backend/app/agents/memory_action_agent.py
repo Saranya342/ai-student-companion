@@ -93,11 +93,22 @@ class MemoryActionAgent:
     
     def _should_save_to_journal(self, message: str) -> bool:
         """Check if message is journal-worthy"""
-        keywords = [
-            "dear diary", "feeling", "today was", "i think",
-            "i feel", "my thoughts", "reflecting"
+        thought_parking_keywords = [
+        "remind me", "don't forget", "need to", "should", "remember to",
+        "buy", "call", "text", "talk to", "message", "email",
+        "pick up", "get", "grab", "bring", "take"
         ]
-        return any(kw in message for kw in keywords)
+    
+    # NOT study-related
+        study_keywords = ["exam", "assignment", "homework", "study", "class", "lecture"]
+    
+        message_lower = message.lower()
+    
+        has_thought = any(kw in message_lower for kw in thought_parking_keywords)
+        is_study = any(kw in message_lower for kw in study_keywords)
+    
+    # Save to journal if it's a thought BUT NOT study-related
+        return has_thought and not is_study 
     
     def _is_achievement_mention(self, message: str) -> bool:
         """Check if user mentioned an achievement"""

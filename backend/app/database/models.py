@@ -19,7 +19,7 @@ class User(Base):
     notifications = relationship("Notification", back_populates="user")
     streaks = relationship("Streak", back_populates="user")  # ADD THIS
     motivational_memories = relationship("MotivationalMemory", back_populates="user")  # ADD THIS
-
+    journal_entries = relationship("JournalEntry", back_populates="user") 
 class Chat(Base):
     __tablename__ = "chats"
 
@@ -106,3 +106,15 @@ class MotivationalMemory(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     user = relationship("User", back_populates="motivational_memories")
+
+class JournalEntry(Base):
+    __tablename__ = "journal_entries"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    entry_type = Column(String, nullable=False)  # "thought_parking", "future_letter", "reflection"
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    user = relationship("User", back_populates="journal_entries")
+    
