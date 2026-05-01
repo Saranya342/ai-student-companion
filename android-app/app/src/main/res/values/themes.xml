@@ -1,9 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.MindMate" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/mm_accent</item>
+        <item name="colorOnPrimary">@color/mm_on_accent</item>
+
+        <item name="colorBackground">@color/mm_bg</item>
+        <item name="colorSurface">@color/mm_surface</item>
+
+        <item name="colorOnBackground">@color/mm_text_primary</item>
+        <item name="colorOnSurface">@color/mm_text_primary</item>
+
+        <item name="android:statusBarColor">@color/mm_bg</item>
+        <item name="android:navigationBarColor">@color/mm_surface</item>
     </style>
 
     <style name="Theme.MindMate" parent="Base.Theme.MindMate" />
 </resources>
+

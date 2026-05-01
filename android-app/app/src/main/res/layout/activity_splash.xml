@@ -7,23 +7,19 @@
     android:padding="32dp"
     android:background="#0D0D0D">
 
-    <!-- Robot Image with purple circle background -->
+    <!-- Robot Image: perfectly round -->
     <FrameLayout
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_marginBottom="40dp">
-
-        <View
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:background="@drawable/circle_purple"/>
+        android:layout_marginBottom="40dp"
+        android:background="@drawable/circle_purple"
+        android:clipToOutline="true">
 
         <ImageView
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:src="@drawable/robot"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop" />
 
     </FrameLayout>
 
@@ -31,20 +27,20 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Meet your "
+        android:text="Meet your"
         android:textColor="#FFFFFF"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:layout_marginBottom="4dp"/>
+        android:layout_marginBottom="4dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="AI bestie ✨"
+        android:text="AI bestie"
         android:textColor="#B388FF"
         android:textSize="28sp"
         android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp" />
 
     <!-- Subtitle -->
     <TextView
@@ -54,7 +50,7 @@
         android:textColor="#888888"
         android:textSize="14sp"
         android:gravity="center"
-        android:layout_marginBottom="40dp"/>
+        android:layout_marginBottom="40dp" />
 
     <!-- Chips row -->
     <LinearLayout
@@ -67,31 +63,31 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🧠 Remembers"
+            android:text="Remembers"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:padding="10dp"
             android:layout_marginEnd="8dp"
-            android:background="@drawable/chip_dark"/>
+            android:background="@drawable/chip_dark" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="💛 Supports"
+            android:text="Supports"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:padding="10dp"
             android:layout_marginEnd="8dp"
-            android:background="@drawable/chip_dark"/>
+            android:background="@drawable/chip_dark" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="📅 Plans"
+            android:text="Plans"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:padding="10dp"
-            android:background="@drawable/chip_dark"/>
+            android:background="@drawable/chip_dark" />
 
     </LinearLayout>
 
@@ -100,18 +96,18 @@
         android:id="@+id/btnLetsGo"
         android:layout_width="280dp"
         android:layout_height="56dp"
-        android:text="Let's go! 🚀"
+        android:text="Let's go!"
         android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="#1A1A1A"
         android:backgroundTint="#FFAB76"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Your personal academic companion"
         android:textColor="#555555"
-        android:textSize="12sp"/>
+        android:textSize="12sp" />
 
 </LinearLayout>

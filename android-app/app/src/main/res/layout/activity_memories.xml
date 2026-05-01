@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:background="#0D0D0D">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,10 +21,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Your Proud Moments ✨"
+                android:text="Your Proud Moments"
                 android:textColor="#FFFFFF"
                 android:textSize="22sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvMemoryCount"
@@ -33,23 +32,21 @@
                 android:layout_height="wrap_content"
                 android:text="Loading..."
                 android:textColor="#888888"
-                android:textSize="13sp"/>
+                android:textSize="13sp" />
 
         </LinearLayout>
 
-        <!-- Search Icon -->
         <TextView
             android:id="@+id/btnSearch"
             android:layout_width="44dp"
             android:layout_height="44dp"
-            android:text="🔍"
+            android:text="&#128269;"
             android:textSize="20sp"
             android:gravity="center"
-            android:background="@drawable/chip_dark"/>
+            android:background="@drawable/chip_dark" />
 
     </LinearLayout>
 
-    <!-- Search Bar (hidden by default) -->
     <LinearLayout
         android:id="@+id/searchLayout"
         android:layout_width="match_parent"
@@ -73,20 +70,19 @@
             android:paddingEnd="16dp"
             android:background="@drawable/edittext_dark"
             android:layout_marginEnd="8dp"
-            android:inputType="text"/>
+            android:inputType="text" />
 
         <TextView
             android:id="@+id/btnCancelSearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="✕"
+            android:text="X"
             android:textColor="#FF5252"
             android:textSize="18sp"
-            android:padding="8dp"/>
+            android:padding="8dp" />
 
     </LinearLayout>
 
-    <!-- Category Filter Chips -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -112,64 +108,77 @@
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/chip_purple"/>
+                android:background="@drawable/chip_purple" />
 
             <TextView
                 android:id="@+id/chipWin"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:text="🏆 WIN"
+                android:text="WIN"
                 android:textColor="#FFFFFF"
                 android:textSize="12sp"
                 android:gravity="center"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/chip_dark"/>
+                android:background="@drawable/chip_dark" />
 
             <TextView
                 android:id="@+id/chipStudy"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:text="📚 STUDY"
+                android:text="STUDY"
                 android:textColor="#FFFFFF"
                 android:textSize="12sp"
                 android:gravity="center"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/chip_dark"/>
+                android:background="@drawable/chip_dark" />
 
             <TextView
                 android:id="@+id/chipGrowth"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:text="💪 GROWTH"
+                android:text="GROWTH"
                 android:textColor="#FFFFFF"
                 android:textSize="12sp"
                 android:gravity="center"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/chip_dark"/>
+                android:background="@drawable/chip_dark" />
 
+            <!-- ✅ ADDED: Achievement chip -->
             <TextView
-                android:id="@+id/chipNote"
+                android:id="@+id/chipAchievement"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:text="📝 NOTE"
+                android:text="ACHIEVE"
                 android:textColor="#FFFFFF"
                 android:textSize="12sp"
                 android:gravity="center"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:background="@drawable/chip_dark"/>
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_dark" />
+
+            <TextView
+                android:id="@+id/chipNote"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="NOTE"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="@drawable/chip_dark" />
 
         </LinearLayout>
 
     </HorizontalScrollView>
 
-    <!-- Add Memory Button -->
     <Button
         android:id="@+id/btnAddMemory"
         android:layout_width="match_parent"
@@ -180,78 +189,14 @@
         android:backgroundTint="#7C4DFF"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="12dp"/>
+        android:layout_marginBottom="12dp" />
 
-    <!-- Memories List -->
     <ScrollView
         android:id="@+id/rvMemories"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1" />
 
-    <!-- Bottom Navigation -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:orientation="horizontal"
-        android:background="#1A1A1A"
-        android:gravity="center">
-
-        <TextView
-            android:id="@+id/navChat"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="💬&#10;Chat"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navPlanner"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="📅&#10;Planner"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navBag"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="🎒&#10;Bag"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navMemories"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="✨&#10;Memories"
-            android:textColor="#B388FF"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="👤&#10;Profile"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-    </LinearLayout>
+    <include layout="@layout/view_bottom_nav" />
 
 </LinearLayout>

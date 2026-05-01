@@ -14,7 +14,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Smart Planner 📋"
+            android:text="Smart Planner"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"/>
@@ -63,7 +63,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Keep going! 👍"
+                android:text="Keep going!"
                 android:textColor="#B388FF"
                 android:textSize="12sp"/>
 
@@ -87,7 +87,7 @@
         android:id="@+id/btnAiPlan"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:text="🤖 Get AI Study Plan"
+        android:text="Get AI Study Plan"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
         android:backgroundTint="#3D1B6E"
@@ -119,68 +119,6 @@
 
     </ScrollView>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:orientation="horizontal"
-        android:background="#1A1A1A"
-        android:gravity="center">
-
-        <TextView
-            android:id="@+id/navChat"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="💬&#10;Chat"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navPlanner"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="📅&#10;Planner"
-            android:textColor="#B388FF"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navBag"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="🎒&#10;Bag"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navMemories"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="✨&#10;Memories"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="👤&#10;Profile"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-    </LinearLayout>
+    <include layout="@layout/view_bottom_nav"/>
 
 </LinearLayout>

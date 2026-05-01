@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="mm_bg">#0F0F10</color>
+    <color name="mm_surface">#171717</color>
+    <color name="mm_surface_variant">#1F1F1F</color>
+    <color name="mm_outline">#2B2B2B</color>
+
+    <color name="mm_text_primary">#F2F2F2</color>
+    <color name="mm_text_secondary">#A9A9A9</color>
+
+    <color name="mm_accent">#B388FF</color>
+    <color name="mm_on_accent">#FFFFFF</color>
+
+    <color name="mm_success">#69F0AE</color>
+    <color name="mm_error">#FF5252</color>
+</resources>

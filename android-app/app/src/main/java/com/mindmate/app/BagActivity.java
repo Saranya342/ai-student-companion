@@ -1,7 +1,6 @@
 package com.mindmate.app;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.mindmate.app.network.ApiClient;
 
 import org.json.JSONArray;
@@ -35,7 +35,6 @@ import retrofit2.Response;
 
 public class BagActivity extends AppCompatActivity {
 
-    TextView navChat, navPlanner, navMemories, navProfile;
     TextView dayMon, dayTue, dayWed, dayThu, dayFri, daySat;
     TextView tvProgressLabel, tvProgressCount, btnAddItem;
     TextView catAll, catBooks, catStationery, catLab, catPersonal;
@@ -43,8 +42,6 @@ public class BagActivity extends AppCompatActivity {
     LinearLayout bagContainer;
     String token;
     String selectedDay = "Monday";
-    String selectedCategory = "all";
-    String selectedItemCategory = "Books";
     Handler mainHandler = new Handler(Looper.getMainLooper());
 
     List<JSONObject> allItems = new ArrayList<>();
@@ -57,42 +54,42 @@ public class BagActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("MindMate", MODE_PRIVATE);
         token = "Bearer " + prefs.getString("token", "");
 
-        // Init views
         tvProgressLabel = findViewById(R.id.tvProgressLabel);
         tvProgressCount = findViewById(R.id.tvProgressCount);
         progressBar = findViewById(R.id.progressBar);
         btnAddItem = findViewById(R.id.btnAddItem);
+
         dayMon = findViewById(R.id.dayMon);
         dayTue = findViewById(R.id.dayTue);
         dayWed = findViewById(R.id.dayWed);
         dayThu = findViewById(R.id.dayThu);
         dayFri = findViewById(R.id.dayFri);
         daySat = findViewById(R.id.daySat);
+
         catAll = findViewById(R.id.catAll);
         catBooks = findViewById(R.id.catBooks);
         catStationery = findViewById(R.id.catStationery);
         catLab = findViewById(R.id.catLab);
         catPersonal = findViewById(R.id.catPersonal);
-        navChat = findViewById(R.id.navChat);
-        navPlanner = findViewById(R.id.navPlanner);
-        navMemories = findViewById(R.id.navMemories);
-        navProfile = findViewById(R.id.navProfile);
 
-        // Setup bag container inside scrollview
         bagContainer = new LinearLayout(this);
         bagContainer.setOrientation(LinearLayout.VERTICAL);
-        bagContainer.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
 
         ScrollView scrollView = findViewById(R.id.rvBagItems);
         scrollView.addView(bagContainer);
 
-        // Load default day - Monday
-        loadBagItems(selectedDay);
-        highlightDay(dayMon);
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        BottomNavHelper.setup(bottomNav, this, R.id.nav_bag);
 
-        // Day clicks
+        // ✅ Check if opened from chat with specific day
+        String dayFromChat = getIntent().getStringExtra("selected_day");
+        if (dayFromChat != null && !dayFromChat.isEmpty()) {
+            selectedDay = dayFromChat;
+        }
+
+        loadBagItems(selectedDay);
+        highlightCorrectDay();
+
         dayMon.setOnClickListener(v -> {
             selectedDay = "Monday";
             loadBagItems(selectedDay);
@@ -124,53 +121,26 @@ public class BagActivity extends AppCompatActivity {
             highlightDay(daySat);
         });
 
-        // Category filter clicks
-        catAll.setOnClickListener(v -> {
-            selectedCategory = "all";
-            updateCategoryChips(catAll);
-            displayItems(allItems);
-        });
-        catBooks.setOnClickListener(v -> {
-            selectedCategory = "books";
-            updateCategoryChips(catBooks);
-            filterByCategory("books");
-        });
-        catStationery.setOnClickListener(v -> {
-            selectedCategory = "stationery";
-            updateCategoryChips(catStationery);
-            filterByCategory("stationery");
-        });
-        catLab.setOnClickListener(v -> {
-            selectedCategory = "lab";
-            updateCategoryChips(catLab);
-            filterByCategory("lab");
-        });
-        catPersonal.setOnClickListener(v -> {
-            selectedCategory = "personal";
-            updateCategoryChips(catPersonal);
-            filterByCategory("personal");
-        });
+        catAll.setOnClickListener(v -> displayItems(allItems));
+        catBooks.setOnClickListener(v -> filterByCategory("books"));
+        catStationery.setOnClickListener(v -> filterByCategory("stationery"));
+        catLab.setOnClickListener(v -> filterByCategory("lab"));
+        catPersonal.setOnClickListener(v -> filterByCategory("personal"));
 
-        // Add item button
         btnAddItem.setOnClickListener(v -> showAddItemDialog());
+    }
 
-        // Navigation
-        navChat.setOnClickListener(v -> {
-            startActivity(new Intent(this, HomeActivity.class));
-            finish();
-        });
-        navPlanner.setOnClickListener(v -> {
-            startActivity(new Intent(this, PlannerActivity.class));
-            finish();
-        });
-        navMemories.setOnClickListener(v -> {
-            startActivity(new Intent(this, MemoriesActivity.class));
-            finish();
-        });
-        navProfile.setOnClickListener(v -> {
-            startActivity(new Intent(this, ProfileActivity.class));
-            finish();
-        });
+    // ✅ Highlight the correct day button on open
+    private void highlightCorrectDay() {
+        switch (selectedDay) {
+            case "Monday":    highlightDay(dayMon); break;
+            case "Tuesday":   highlightDay(dayTue); break;
+            case "Wednesday": highlightDay(dayWed); break;
+            case "Thursday":  highlightDay(dayThu); break;
+            case "Friday":    highlightDay(dayFri); break;
+            case "Saturday":  highlightDay(daySat); break;
+            default:          highlightDay(dayMon); break;
+        }
     }
 
     private void highlightDay(TextView selected) {
@@ -181,68 +151,32 @@ public class BagActivity extends AppCompatActivity {
         dayFri.setBackgroundResource(R.drawable.chip_dark);
         daySat.setBackgroundResource(R.drawable.chip_dark);
         selected.setBackgroundResource(R.drawable.chip_purple);
-
         String shortDay = selectedDay.substring(0, 3).toUpperCase();
         tvProgressLabel.setText(shortDay + " CHECKLIST");
-    }
-
-    private void updateCategoryChips(TextView selected) {
-        catAll.setBackgroundResource(R.drawable.chip_dark);
-        catBooks.setBackgroundResource(R.drawable.chip_dark);
-        catStationery.setBackgroundResource(R.drawable.chip_dark);
-        catLab.setBackgroundResource(R.drawable.chip_dark);
-        catPersonal.setBackgroundResource(R.drawable.chip_dark);
-        selected.setBackgroundResource(R.drawable.chip_purple);
     }
 
     private void filterByCategory(String category) {
         List<JSONObject> filtered = new ArrayList<>();
         for (JSONObject item : allItems) {
-            try {
-                String itemCat = item.optString(
-                        "category", "personal").toLowerCase();
-                if (itemCat.equals(category)) {
-                    filtered.add(item);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            String itemCat = item.optString(
+                    "category", "personal").toLowerCase();
+            if (itemCat.equals(category)) filtered.add(item);
         }
         displayItems(filtered);
     }
 
     private String getEmojiForItem(String itemName) {
-        String name = itemName.toLowerCase();
+        String name = itemName == null ? "" : itemName.toLowerCase();
         if (name.contains("notebook") || name.contains("book")
-                || name.contains("record")) return "📓";
-        if (name.contains("pen") || name.contains("pencil")) return "✏️";
-        if (name.contains("water")) return "💧";
-        if (name.contains("id") || name.contains("card")) return "🪪";
-        if (name.contains("lab") || name.contains("coat")) return "🥼";
-        if (name.contains("calculator")) return "🔢";
-        if (name.contains("phone")) return "📱";
-        if (name.contains("charger")) return "🔌";
-        if (name.contains("lunch") || name.contains("food")) return "🍱";
-        if (name.contains("umbrella")) return "☂️";
-        if (name.contains("bag") || name.contains("backpack")) return "🎒";
-        if (name.contains("glasses")) return "👓";
-        if (name.contains("headphone")
-                || name.contains("earphone")) return "🎧";
-        if (name.contains("key")) return "🔑";
-        if (name.contains("mask")) return "😷";
-        if (name.contains("sanitizer")) return "🧴";
-        return "📦";
-    }
-
-    private String getEmojiForCategory(String category) {
-        if (category == null) return "📦";
-        switch (category.toLowerCase()) {
-            case "books": return "📚";
-            case "stationery": return "✏️";
-            case "lab": return "🧪";
-            case "personal": return "👤";
-            default: return "📦";
-        }
+                || name.contains("record")) return "\uD83D\uDCD3";
+        if (name.contains("pen") || name.contains("pencil")) return "\u270F\uFE0F";
+        if (name.contains("water")) return "\uD83D\uDCA7";
+        if (name.contains("id") || name.contains("card")) return "\uD83E\uDEAA";
+        if (name.contains("lab") || name.contains("coat")) return "\uD83E\uDDBC";
+        if (name.contains("calculator")) return "\uD83D\uDD22";
+        if (name.contains("charger")) return "\uD83D\uDD0C";
+        if (name.contains("laptop")) return "\uD83D\uDCBB";
+        return "\uD83D\uDCE6";
     }
 
     private void loadBagItems(String day) {
@@ -279,8 +213,7 @@ public class BagActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Call<ResponseBody> call,
-                                          Throwable t) {
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
                         mainHandler.post(() ->
                                 Toast.makeText(BagActivity.this,
                                         "Failed to load items",
@@ -291,12 +224,7 @@ public class BagActivity extends AppCompatActivity {
 
     private void updateProgress(int checked, int total) {
         tvProgressCount.setText(checked + "/" + total + " packed");
-        if (total > 0) {
-            int progress = (checked * 100) / total;
-            progressBar.setProgress(progress);
-        } else {
-            progressBar.setProgress(0);
-        }
+        progressBar.setProgress(total > 0 ? (checked * 100) / total : 0);
     }
 
     private void displayItems(List<JSONObject> items) {
@@ -304,10 +232,9 @@ public class BagActivity extends AppCompatActivity {
 
         if (items.isEmpty()) {
             TextView empty = new TextView(this);
-            empty.setText("No items here!\nTap + to add items 🎒");
+            empty.setText("No items here! Tap + to add items 🎒");
             empty.setTextColor(0xFF888888);
             empty.setTextSize(14);
-            empty.setGravity(android.view.Gravity.CENTER);
             empty.setPadding(32, 64, 32, 32);
             bagContainer.addView(empty);
             return;
@@ -318,7 +245,6 @@ public class BagActivity extends AppCompatActivity {
                 addBagItemView(
                         item.getInt("id"),
                         item.getString("item_name"),
-                        item.optString("category", "personal"),
                         item.getString("is_checked").equals("true")
                 );
             } catch (Exception e) {
@@ -327,53 +253,27 @@ public class BagActivity extends AppCompatActivity {
         }
     }
 
-    private void addBagItemView(int id, String name,
-                                String category, boolean isChecked) {
+    private void addBagItemView(int id, String name, boolean isChecked) {
         View itemView = LayoutInflater.from(this)
                 .inflate(R.layout.item_bag, bagContainer, false);
 
         TextView tvEmoji = itemView.findViewById(R.id.tvItemEmoji);
         TextView tvName = itemView.findViewById(R.id.tvBagItemName);
-        TextView tvCategory = itemView.findViewById(R.id.tvItemCategory);
         TextView btnDelete = itemView.findViewById(R.id.btnDeleteItem);
         CheckBox checkBox = itemView.findViewById(R.id.checkBagItem);
 
         tvEmoji.setText(getEmojiForItem(name));
         tvName.setText(name);
-        tvCategory.setText(getEmojiForCategory(category)
-                + " " + category.toUpperCase());
         checkBox.setChecked(isChecked);
 
         if (isChecked) {
             tvName.setPaintFlags(tvName.getPaintFlags()
                     | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-            tvName.setTextColor(0xFF555555);
-        } else {
-            tvName.setPaintFlags(tvName.getPaintFlags()
-                    & ~android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-            tvName.setTextColor(0xFFFFFFFF);
+            tvName.setTextColor(0xFF888888);
         }
 
-        checkBox.setOnCheckedChangeListener((btn, checked) -> {
-            if (checked) {
-                tvName.setPaintFlags(tvName.getPaintFlags()
-                        | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-                tvName.setTextColor(0xFF555555);
-            } else {
-                tvName.setPaintFlags(tvName.getPaintFlags()
-                        & ~android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-                tvName.setTextColor(0xFFFFFFFF);
-            }
-            updateItemCheck(id, checked);
-        });
-
-        // Long press to delete
-        itemView.setOnLongClickListener(v -> {
-            showDeleteConfirm(id, name);
-            return true;
-        });
-
-        // Delete button click
+        checkBox.setOnCheckedChangeListener(
+                (btn, checked) -> updateItemCheck(id, checked));
         btnDelete.setOnClickListener(v -> showDeleteConfirm(id, name));
 
         bagContainer.addView(itemView);
@@ -382,34 +282,21 @@ public class BagActivity extends AppCompatActivity {
     private void showDeleteConfirm(int id, String name) {
         new AlertDialog.Builder(this)
                 .setTitle("Remove Item?")
-                .setMessage("Remove \""
-                        + name + "\" from "
-                        + selectedDay + "'s bag?")
-                .setPositiveButton("Remove", (dialog, which) ->
-                        deleteItem(id))
+                .setMessage("Remove \"" + name + "\" from "
+                        + selectedDay + "?")
+                .setPositiveButton("Remove",
+                        (dialog, which) -> deleteItem(id))
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
     private void deleteItem(int itemId) {
-        // FIXED: use deleteBagItem not deleteTask
         ApiClient.getService().deleteBagItem(token, itemId)
                 .enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call,
                                            Response<ResponseBody> response) {
-                        mainHandler.post(() -> {
-                            if (response.isSuccessful()) {
-                                Toast.makeText(BagActivity.this,
-                                        "Item removed ✅",
-                                        Toast.LENGTH_SHORT).show();
-                                loadBagItems(selectedDay);
-                            } else {
-                                Toast.makeText(BagActivity.this,
-                                        "Failed to remove!",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                        mainHandler.post(() -> loadBagItems(selectedDay));
                     }
 
                     @Override
@@ -417,7 +304,7 @@ public class BagActivity extends AppCompatActivity {
                                           Throwable t) {
                         mainHandler.post(() ->
                                 Toast.makeText(BagActivity.this,
-                                        "Connection failed!",
+                                        "Failed to remove!",
                                         Toast.LENGTH_SHORT).show());
                     }
                 });
@@ -425,67 +312,28 @@ public class BagActivity extends AppCompatActivity {
 
     private void showAddItemDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
         View dialogView = LayoutInflater.from(this)
                 .inflate(R.layout.dialog_add_bag_item, null);
         builder.setView(dialogView);
 
         EditText etItemName = dialogView.findViewById(R.id.etItemName);
-        TextView dCatBooks = dialogView.findViewById(R.id.catBooks);
-        TextView dCatStationery = dialogView.findViewById(R.id.catStationery);
-        TextView dCatLab = dialogView.findViewById(R.id.catLab);
-        TextView dCatPersonal = dialogView.findViewById(R.id.catPersonal);
 
-        // Default selected
-        selectedItemCategory = "Books";
-        dCatBooks.setBackgroundResource(R.drawable.chip_purple);
-
-        dCatBooks.setOnClickListener(v -> {
-            selectedItemCategory = "Books";
-            dCatBooks.setBackgroundResource(R.drawable.chip_purple);
-            dCatStationery.setBackgroundResource(R.drawable.chip_dark);
-            dCatLab.setBackgroundResource(R.drawable.chip_dark);
-            dCatPersonal.setBackgroundResource(R.drawable.chip_dark);
-        });
-        dCatStationery.setOnClickListener(v -> {
-            selectedItemCategory = "Stationery";
-            dCatBooks.setBackgroundResource(R.drawable.chip_dark);
-            dCatStationery.setBackgroundResource(R.drawable.chip_purple);
-            dCatLab.setBackgroundResource(R.drawable.chip_dark);
-            dCatPersonal.setBackgroundResource(R.drawable.chip_dark);
-        });
-        dCatLab.setOnClickListener(v -> {
-            selectedItemCategory = "Lab";
-            dCatBooks.setBackgroundResource(R.drawable.chip_dark);
-            dCatStationery.setBackgroundResource(R.drawable.chip_dark);
-            dCatLab.setBackgroundResource(R.drawable.chip_purple);
-            dCatPersonal.setBackgroundResource(R.drawable.chip_dark);
-        });
-        dCatPersonal.setOnClickListener(v -> {
-            selectedItemCategory = "Personal";
-            dCatBooks.setBackgroundResource(R.drawable.chip_dark);
-            dCatStationery.setBackgroundResource(R.drawable.chip_dark);
-            dCatLab.setBackgroundResource(R.drawable.chip_dark);
-            dCatPersonal.setBackgroundResource(R.drawable.chip_purple);
-        });
-
-        builder.setTitle("Add to " + selectedDay + "'s Bag 🎒");
-        builder.setPositiveButton("Add ✅", (dialog, which) -> {
+        builder.setTitle("Add item to " + selectedDay + " 🎒");
+        builder.setPositiveButton("Add", (dialog, which) -> {
             String itemName = etItemName.getText().toString().trim();
             if (itemName.isEmpty()) {
                 Toast.makeText(this,
-                        "Please enter item name!",
+                        "Enter item name!",
                         Toast.LENGTH_SHORT).show();
                 return;
             }
-            addBagItem(itemName, selectedItemCategory);
+            addBagItem(itemName);
         });
-
         builder.setNegativeButton("Cancel", null);
         builder.show();
     }
 
-    private void addBagItem(String itemName, String category) {
+    private void addBagItem(String itemName) {
         try {
             JSONObject json = new JSONObject();
             json.put("day", selectedDay);
@@ -496,7 +344,6 @@ public class BagActivity extends AppCompatActivity {
                     json.toString()
             );
 
-            // FIXED: use addBagItem not addTask
             ApiClient.getService().addBagItem(token, body)
                     .enqueue(new Callback<ResponseBody>() {
                         @Override
@@ -505,18 +352,10 @@ public class BagActivity extends AppCompatActivity {
                             mainHandler.post(() -> {
                                 if (response.isSuccessful()) {
                                     Toast.makeText(BagActivity.this,
-                                            getEmojiForItem(itemName)
-                                                    + " "
-                                                    + itemName
-                                                    + " added to bag!",
-                                            Toast.LENGTH_SHORT).show();
-                                    loadBagItems(selectedDay);
-                                } else {
-                                    Toast.makeText(BagActivity.this,
-                                            "Item already exists for "
-                                                    + selectedDay + "!",
+                                            itemName + " added! ✅",
                                             Toast.LENGTH_SHORT).show();
                                 }
+                                loadBagItems(selectedDay);
                             });
                         }
 
@@ -549,8 +388,7 @@ public class BagActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(Call<ResponseBody> call,
                                                Response<ResponseBody> response) {
-                            mainHandler.post(() ->
-                                    loadBagItems(selectedDay));
+                            mainHandler.post(() -> loadBagItems(selectedDay));
                         }
 
                         @Override

@@ -14,8 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.mindmate.app.model.AgentChatResponse;
 import com.mindmate.app.model.ChatRequest;
-import com.mindmate.app.model.ChatResponse;
 import com.mindmate.app.network.ApiClient;
 
 import java.util.ArrayList;
@@ -31,24 +32,19 @@ public class HomeActivity extends AppCompatActivity {
     EditText etMessage;
     Button btnSend;
     TextView chipRemind, chipStressed, chipPlan, chipBag;
-    TextView navPlanner, navBag, navMemories, navProfile;
 
     List<ChatMessage> messages = new ArrayList<>();
     ChatAdapter adapter;
+
     String token;
     boolean isWaiting = false;
-
     Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    private static boolean greetedThisSession = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        android.os.StrictMode.ThreadPolicy policy =
-                new android.os.StrictMode.ThreadPolicy.Builder()
-                        .permitAll().build();
-        android.os.StrictMode.setThreadPolicy(policy);
-
         setContentView(R.layout.activity_home);
 
         SharedPreferences prefs = getSharedPreferences("MindMate", MODE_PRIVATE);
@@ -57,14 +53,11 @@ public class HomeActivity extends AppCompatActivity {
         rvMessages = findViewById(R.id.rvMessages);
         etMessage = findViewById(R.id.etMessage);
         btnSend = findViewById(R.id.btnSend);
+
         chipRemind = findViewById(R.id.chipRemind);
         chipStressed = findViewById(R.id.chipStressed);
         chipPlan = findViewById(R.id.chipPlan);
         chipBag = findViewById(R.id.chipBag);
-        navPlanner = findViewById(R.id.navPlanner);
-        navBag = findViewById(R.id.navBag);
-        navMemories = findViewById(R.id.navMemories);
-        navProfile = findViewById(R.id.navProfile);
 
         adapter = new ChatAdapter(messages);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -72,23 +65,33 @@ public class HomeActivity extends AppCompatActivity {
         rvMessages.setLayoutManager(layoutManager);
         rvMessages.setAdapter(adapter);
 
-        addBotMessage("Hey! 👋 How's your day going? I'm here whenever you need me.");
+        if (!greetedThisSession) {
+            messages.clear();
+            adapter.notifyDataSetChanged();
+            addBotMessage("Hey! 👋 Tell me what you're working on today.");
+            greetedThisSession = true;
+        }
 
         btnSend.setOnClickListener(v -> sendMessage());
 
-        chipRemind.setOnClickListener(v -> sendQuickMessage("Remind me about something"));
+        chipRemind.setOnClickListener(v -> sendQuickMessage("Remind me to do something"));
         chipStressed.setOnClickListener(v -> sendQuickMessage("I feel stressed"));
         chipPlan.setOnClickListener(v -> sendQuickMessage("Plan my day"));
-        chipBag.setOnClickListener(v -> sendQuickMessage("What to carry tomorrow?"));
+        chipBag.setOnClickListener(v -> sendQuickMessage("Bag checklist for Monday"));
 
-        navPlanner.setOnClickListener(v ->
-                startActivity(new Intent(this, PlannerActivity.class)));
-        navBag.setOnClickListener(v ->
-                startActivity(new Intent(this, BagActivity.class)));
-        navMemories.setOnClickListener(v ->
-                startActivity(new Intent(this, MemoriesActivity.class)));
-        navProfile.setOnClickListener(v ->
-                startActivity(new Intent(this, ProfileActivity.class)));
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+        bottomNav.setSelectedItemId(R.id.nav_chat);
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_chat) return true;
+
+            if (id == R.id.nav_planner) startActivity(new Intent(this, PlannerActivity.class));
+            else if (id == R.id.nav_bag) startActivity(new Intent(this, BagActivity.class));
+            else if (id == R.id.nav_journal) startActivity(new Intent(this, JournalActivity.class));
+            else if (id == R.id.nav_profile) startActivity(new Intent(this, ProfileActivity.class));
+
+            return true;
+        });
     }
 
     private void sendQuickMessage(String message) {
@@ -114,18 +117,57 @@ public class HomeActivity extends AppCompatActivity {
 
         ChatRequest request = new ChatRequest(message);
 
-        ApiClient.getService().sendMessage(token, request)
-                .enqueue(new Callback<ChatResponse>() {
+        ApiClient.getService().agentChat(token, request)
+                .enqueue(new Callback<AgentChatResponse>() {
                     @Override
-                    public void onResponse(Call<ChatResponse> call,
-                                           Response<ChatResponse> response) {
+                    public void onResponse(Call<AgentChatResponse> call,
+                                           Response<AgentChatResponse> response) {
                         mainHandler.post(() -> {
-                            removeLastMessage();
+                            removeLastTyping();
                             isWaiting = false;
                             btnSend.setEnabled(true);
 
                             if (response.isSuccessful() && response.body() != null) {
-                                addBotMessage(response.body().getBotReply());
+                                AgentChatResponse body = response.body();
+
+                                String reply = body.getResponse();
+                                if (reply == null || reply.trim().isEmpty()) {
+                                    reply = "I didn't get that. Can you try again?";
+                                }
+                                addBotMessage(reply);
+
+                                if (body.getTasksAddedToPlanner() > 0) {
+                                    Toast.makeText(
+                                            HomeActivity.this,
+                                            "✅ Added " + body.getTasksAddedToPlanner() + " task(s) to Planner",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+                                }
+
+                                if (body.getBagDay() != null
+                                        && !body.getBagDay().isEmpty()
+                                        && body.getBagItemsAdded() > 0) {
+                                    Toast.makeText(
+                                            HomeActivity.this,
+                                            "🎒 Bag ready for " + body.getBagDay()
+                                                    + "! " + body.getBagItemsAdded() + " item(s) added",
+                                            Toast.LENGTH_LONG
+                                    ).show();
+
+                                    Intent bagIntent = new Intent(HomeActivity.this, BagActivity.class);
+                                    bagIntent.putExtra("selected_day", body.getBagDay());
+                                    startActivity(bagIntent);
+                                }
+
+                                // ✅ Thought Parking toast
+                                if (body.isThoughtParked()) {
+                                    Toast.makeText(
+                                            HomeActivity.this,
+                                            "🧠 Saved to Thought Parking",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+                                }
+
                             } else {
                                 addBotMessage("Hmm something went wrong 😅 Try again!");
                             }
@@ -133,9 +175,9 @@ public class HomeActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Call<ChatResponse> call, Throwable t) {
+                    public void onFailure(Call<AgentChatResponse> call, Throwable t) {
                         mainHandler.post(() -> {
-                            removeLastMessage();
+                            removeLastTyping();
                             isWaiting = false;
                             btnSend.setEnabled(true);
                             addBotMessage("Can't connect to server 😔 Is backend running?");
@@ -156,10 +198,13 @@ public class HomeActivity extends AppCompatActivity {
         rvMessages.scrollToPosition(messages.size() - 1);
     }
 
-    private void removeLastMessage() {
+    private void removeLastTyping() {
         if (!messages.isEmpty()) {
-            messages.remove(messages.size() - 1);
-            adapter.notifyItemRemoved(messages.size());
+            ChatMessage last = messages.get(messages.size() - 1);
+            if (!last.isUser() && last.getText() != null && last.getText().startsWith("typing")) {
+                messages.remove(messages.size() - 1);
+                adapter.notifyItemRemoved(messages.size());
+            }
         }
     }
 }

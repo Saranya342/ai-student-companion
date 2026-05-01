@@ -10,18 +10,17 @@
     android:layout_marginStart="16dp"
     android:layout_marginEnd="16dp">
 
-    <!-- Item Emoji -->
     <TextView
         android:id="@+id/tvItemEmoji"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:text="📦"
+        android:text=""
         android:textSize="20sp"
+        android:textColor="@color/mm_on_accent"
         android:gravity="center"
         android:background="@drawable/circle_purple"
         android:layout_marginEnd="12dp"/>
 
-    <!-- Item Info -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -32,7 +31,7 @@
             android:id="@+id/tvBagItemName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="15sp"
             android:textStyle="bold"/>
 
@@ -40,26 +39,24 @@
             android:id="@+id/tvItemCategory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#888888"
+            android:text=""
+            android:textColor="@color/mm_text_secondary"
             android:textSize="11sp"/>
-
     </LinearLayout>
 
-    <!-- Delete Button -->
     <TextView
         android:id="@+id/btnDeleteItem"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:text="🗑"
-        android:textSize="16sp"
-        android:gravity="center"
-        android:layout_marginEnd="8dp"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="X"
+        android:textSize="14sp"
+        android:textColor="@color/mm_error"
+        android:padding="10dp"
+        android:layout_marginEnd="6dp"/>
 
-    <!-- Checkbox -->
     <CheckBox
         android:id="@+id/checkBagItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:buttonTint="#7C4DFF"/>
-
+        android:buttonTint="@color/mm_accent"/>
 </LinearLayout>

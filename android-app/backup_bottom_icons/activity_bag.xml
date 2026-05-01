@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Smart Bag"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="24sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Never forget anything again"
+                android:textColor="@color/mm_text_secondary"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_dark"
+            android:padding="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/tvProgressLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="MON CHECKLIST"
+                    android:textColor="@color/mm_text_secondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/tvProgressCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0/0 packed"
+                    android:textColor="@color/mm_accent"
+                    android:textSize="12sp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/progress_purple"/>
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView android:id="@+id/dayMon" android:layout_width="70dp" android:layout_height="44dp"
+                    android:text="Mon" android:textColor="?attr/colorOnSurface" android:textSize="14sp"
+                    android:gravity="center" android:layout_marginEnd="8dp" android:background="@drawable/chip_purple"/>
+
+                <TextView android:id="@+id/dayTue" android:layout_width="70dp" android:layout_height="44dp"
+                    android:text="Tue" android:textColor="?attr/colorOnSurface" android:textSize="14sp"
+                    android:gravity="center" android:layout_marginEnd="8dp" android:background="@drawable/chip_dark"/>
+
+                <TextView android:id="@+id/dayWed" android:layout_width="70dp" android:layout_height="44dp"
+                    android:text="Wed" android:textColor="?attr/colorOnSurface" android:textSize="14sp"
+                    android:gravity="center" android:layout_marginEnd="8dp" android:background="@drawable/chip_dark"/>
+
+                <TextView android:id="@+id/dayThu" android:layout_width="70dp" android:layout_height="44dp"
+                    android:text="Thu" android:textColor="?attr/colorOnSurface" android:textSize="14sp"
+                    android:gravity="center" android:layout_marginEnd="8dp" android:background="@drawable/chip_dark"/>
+
+                <TextView android:id="@+id/dayFri" android:layout_width="70dp" android:layout_height="44dp"
+                    android:text="Fri" android:textColor="?attr/colorOnSurface" android:textSize="14sp"
+                    android:gravity="center" android:layout_marginEnd="8dp" android:background="@drawable/chip_dark"/>
+
+                <TextView android:id="@+id/daySat" android:layout_width="70dp" android:layout_height="44dp"
+                    android:text="Sat" android:textColor="?attr/colorOnSurface" android:textSize="14sp"
+                    android:gravity="center" android:background="@drawable/chip_dark"/>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="12dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView android:id="@+id/catAll" android:layout_width="wrap_content" android:layout_height="32dp"
+                    android:text="ALL" android:textColor="@color/mm_on_accent" android:textSize="11sp"
+                    android:textStyle="bold" android:gravity="center" android:paddingStart="12dp"
+                    android:paddingEnd="12dp" android:layout_marginEnd="8dp" android:background="@drawable/chip_purple"/>
+
+                <TextView android:id="@+id/catBooks" android:layout_width="wrap_content" android:layout_height="32dp"
+                    android:text="Books" android:textColor="?attr/colorOnSurface" android:textSize="11sp"
+                    android:gravity="center" android:paddingStart="12dp" android:paddingEnd="12dp"
+                    android:layout_marginEnd="8dp" android:background="@drawable/chip_dark"/>
+
+                <TextView android:id="@+id/catStationery" android:layout_width="wrap_content" android:layout_height="32dp"
+                    android:text="Stationery" android:textColor="?attr/colorOnSurface" android:textSize="11sp"
+                    android:gravity="center" android:paddingStart="12dp" android:paddingEnd="12dp"
+                    android:layout_marginEnd="8dp" android:background="@drawable/chip_dark"/>
+
+                <TextView android:id="@+id/catLab" android:layout_width="wrap_content" android:layout_height="32dp"
+                    android:text="Lab" android:textColor="?attr/colorOnSurface" android:textSize="11sp"
+                    android:gravity="center" android:paddingStart="12dp" android:paddingEnd="12dp"
+                    android:layout_marginEnd="8dp" android:background="@drawable/chip_dark"/>
+
+                <TextView android:id="@+id/catPersonal" android:layout_width="wrap_content" android:layout_height="32dp"
+                    android:text="Personal" android:textColor="?attr/colorOnSurface" android:textSize="11sp"
+                    android:gravity="center" android:paddingStart="12dp" android:paddingEnd="12dp"
+                    android:background="@drawable/chip_dark"/>
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <ScrollView
+            android:id="@+id/rvBagItems"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <include layout="@layout/view_bottom_nav" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/btnAddItem"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:text="+"
+        android:textColor="@color/mm_on_accent"
+        android:textSize="30sp"
+        android:gravity="center"
+        android:background="@drawable/circle_purple"
+        android:layout_gravity="end|bottom"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="90dp"
+        android:elevation="10dp"/>
+</FrameLayout>

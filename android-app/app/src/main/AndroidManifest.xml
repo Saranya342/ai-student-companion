@@ -24,13 +24,23 @@
         <activity android:name=".MainActivity" />
         <activity android:name=".LoginActivity" />
         <activity android:name=".RegisterActivity" />
+
         <activity
             android:name=".HomeActivity"
             android:windowSoftInputMode="adjustResize"/>
+
         <activity android:name=".PlannerActivity" />
         <activity android:name=".BagActivity" />
+
+        <!-- Keep your old Memories screen if you still want it later -->
         <activity android:name=".MemoriesActivity" />
+
+        <!-- NEW -->
+        <activity android:name=".JournalActivity" />
+
         <activity android:name=".ProfileActivity" />
+        <activity android:name=".FaqActivity" />
+        <activity android:name=".AboutActivity" />
 
     </application>
 

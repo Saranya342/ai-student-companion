@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="What are you proud of? ✨"
+        android:text="Add Memory"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -19,7 +19,7 @@
         android:id="@+id/etMemoryContent"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:hint="Share your proud moment..."
+        android:hint="Write something..."
         android:textColorHint="#555555"
         android:textColor="#FFFFFF"
         android:gravity="top"
@@ -35,7 +35,6 @@
         android:textSize="13sp"
         android:layout_marginBottom="8dp"/>
 
-    <!-- Category chips -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,11 +42,11 @@
         android:layout_marginBottom="16dp">
 
         <TextView
-            android:id="@+id/catWin"
+            android:id="@+id/catAchievement"
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_weight="1"
-            android:text="🏆 Win"
+            android:text="ðŸ… Achieve"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:gravity="center"
@@ -55,11 +54,11 @@
             android:background="@drawable/chip_purple"/>
 
         <TextView
-            android:id="@+id/catStudy"
+            android:id="@+id/catWin"
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_weight="1"
-            android:text="📚 Study"
+            android:text="ðŸ† Win"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:gravity="center"
@@ -71,7 +70,7 @@
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_weight="1"
-            android:text="💪 Growth"
+            android:text="ðŸŒ± Growth"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:gravity="center"
@@ -83,12 +82,13 @@
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_weight="1"
-            android:text="📝 Note"
+            android:text="ðŸ“ Note"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:gravity="center"
             android:background="@drawable/chip_dark"/>
-
     </LinearLayout>
 
 </LinearLayout>
+
+

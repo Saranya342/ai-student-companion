@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?attr/colorBackground">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Motivation Memories"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="22sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tvMemoryCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Loading..."
+                android:textColor="@color/mm_text_secondary"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/btnSearch"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:text="Search"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:background="@drawable/chip_dark"/>
+    </LinearLayout>
+
+    <!-- Search Bar -->
+    <LinearLayout
+        android:id="@+id/searchLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:hint="Search memories..."
+            android:textColor="?attr/colorOnSurface"
+            android:textColorHint="@color/mm_text_secondary"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="@drawable/edittext_dark"
+            android:layout_marginEnd="8dp"
+            android:inputType="text"/>
+
+        <TextView
+            android:id="@+id/btnCancelSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="X"
+            android:textColor="@color/mm_error"
+            android:textSize="16sp"
+            android:padding="8dp"/>
+    </LinearLayout>
+
+    <!-- Category Chips -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/chipAll"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="ALL"
+                android:textColor="@color/mm_on_accent"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_purple"/>
+
+            <TextView
+                android:id="@+id/chipAchievement"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="ACHIEVE"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_dark"/>
+
+            <TextView
+                android:id="@+id/chipWin"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="WIN"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_dark"/>
+
+            <TextView
+                android:id="@+id/chipGrowth"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="GROWTH"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_dark"/>
+
+            <TextView
+                android:id="@+id/chipNote"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="NOTE"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="@drawable/chip_dark"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <Button
+        android:id="@+id/btnAddMemory"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="+ Add Memory"
+        android:textColor="@color/mm_on_accent"
+        android:backgroundTint="@color/mm_accent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="12dp"/>
+
+    <ScrollView
+        android:id="@+id/rvMemories"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <!-- Material Bottom Nav -->
+    <include layout="@layout/view_bottom_nav" />
+</LinearLayout>

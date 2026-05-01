@@ -1,10 +1,11 @@
 package com.mindmate.app.network;
 
+import com.mindmate.app.model.AgentChatResponse;
+import com.mindmate.app.model.ChatRequest;
+import com.mindmate.app.model.ChatResponse;
 import com.mindmate.app.model.LoginRequest;
 import com.mindmate.app.model.LoginResponse;
 import com.mindmate.app.model.RegisterRequest;
-import com.mindmate.app.model.ChatRequest;
-import com.mindmate.app.model.ChatResponse;
 
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -20,7 +21,7 @@ import retrofit2.http.Path;
 public interface ApiService {
 
     // =====================
-    // USER ENDPOINTS
+    // USER
     // =====================
     @POST("users/register")
     Call<Void> register(@Body RegisterRequest request);
@@ -29,18 +30,28 @@ public interface ApiService {
     Call<LoginResponse> login(@Body LoginRequest request);
 
     // =====================
-    // CHAT ENDPOINTS
+    // CHAT
     // =====================
     @POST("chat/send")
     Call<ChatResponse> sendMessage(
             @Header("Authorization") String token,
-            @Body ChatRequest request);
+            @Body ChatRequest request
+    );
+
+    @POST("chat/agent")
+    Call<AgentChatResponse> agentChat(
+            @Header("Authorization") String token,
+            @Body ChatRequest request
+    );
 
     @GET("chat/history")
-    Call<Object> getChatHistory(@Header("Authorization") String token);
+    Call<ResponseBody> getChatHistory(@Header("Authorization") String token);
+
+    @DELETE("chat/clear")
+    Call<ResponseBody> clearChat(@Header("Authorization") String token);
 
     // =====================
-    // PLANNER ENDPOINTS
+    // PLANNER
     // =====================
     @GET("planner/tasks")
     Call<ResponseBody> getTasks(@Header("Authorization") String token);
@@ -48,47 +59,78 @@ public interface ApiService {
     @POST("planner/tasks/add")
     Call<ResponseBody> addTask(
             @Header("Authorization") String token,
-            @Body RequestBody body);
+            @Body RequestBody body
+    );
 
     @PUT("planner/tasks/complete/{id}")
     Call<ResponseBody> completeTask(
             @Header("Authorization") String token,
-            @Path("id") int id);
+            @Path("id") int id
+    );
 
     @DELETE("planner/tasks/delete/{id}")
     Call<ResponseBody> deleteTask(
             @Header("Authorization") String token,
-            @Path("id") int id);
+            @Path("id") int id
+    );
 
     @GET("planner/tasks/ai-plan")
     Call<ResponseBody> getAiPlan(@Header("Authorization") String token);
 
     // =====================
-    // BAG ENDPOINTS
+    // BAG
     // =====================
     @GET("bag/day/{day}")
     Call<ResponseBody> getBagItems(
             @Header("Authorization") String token,
-            @Path("day") String day);
+            @Path("day") String day
+    );
 
     @POST("bag/item/add")
     Call<ResponseBody> addBagItem(
             @Header("Authorization") String token,
-            @Body RequestBody body);
+            @Body RequestBody body
+    );
 
     @PUT("bag/item/check/{id}")
     Call<ResponseBody> checkBagItem(
             @Header("Authorization") String token,
             @Path("id") int id,
-            @Body RequestBody body);
+            @Body RequestBody body
+    );
 
     @DELETE("bag/item/delete/{id}")
     Call<ResponseBody> deleteBagItem(
             @Header("Authorization") String token,
-            @Path("id") int id);
+            @Path("id") int id
+    );
+
+    @PUT("bag/day/reset/{day}")
+    Call<ResponseBody> resetBagDay(
+            @Header("Authorization") String token,
+            @Path("day") String day
+    );
 
     // =====================
-    // MEMORY ENDPOINTS
+    // JOURNAL (Thought Parking)
+    // =====================
+    @GET("journal/thought-parking")
+    Call<ResponseBody> getThoughtParking(@Header("Authorization") String token);
+
+    @POST("journal/thought-parking")
+    Call<ResponseBody> addThoughtParking(
+            @Header("Authorization") String token,
+            @Body RequestBody body
+    );
+
+    @DELETE("journal/thought-parking/{id}")
+    Call<ResponseBody> deleteThoughtParking(
+            @Header("Authorization") String token,
+            @Path("id") int id
+    );
+
+    // =====================
+    // MEMORY
     // =====================
     @GET("memory/history")
     Call<ResponseBody> getMemories(@Header("Authorization") String token);
@@ -96,12 +138,14 @@ public interface ApiService {
     @POST("memory/add")
     Call<ResponseBody> addMemory(
             @Header("Authorization") String token,
-            @Body RequestBody body);
+            @Body RequestBody body
+    );
 
     @DELETE("memory/{id}")
     Call<ResponseBody> deleteMemory(
             @Header("Authorization") String token,
-            @Path("id") int id);
+            @Path("id") int id
+    );
 
     @GET("memory/thoughts")
     Call<ResponseBody> getThoughts(@Header("Authorization") String token);
@@ -109,4 +153,39 @@ public interface ApiService {
     @GET("memory/future-letters")
     Call<ResponseBody> getFutureLetters(@Header("Authorization") String token);
 
+    // =====================
+    // PROFILE
+    // =====================
+    @GET("profile/me")
+    Call<ResponseBody> getProfileMe(@Header("Authorization") String token);
+
+    @POST("profile/highfive")
+    Call<ResponseBody> highFive(@Header("Authorization") String token);
+
+    @GET("profile/streaks")
+    Call<ResponseBody> getStreaks(@Header("Authorization") String token);
+
+    @GET("profile/help/faq")
+    Call<ResponseBody> getFaq();
+
+    @GET("profile/about")
+    Call<ResponseBody> getAbout();
+
+    // =====================
+    // NOTIFICATIONS
+    // =====================
+    @GET("notifications/")
+    Call<ResponseBody> getNotifications(@Header("Authorization") String token);
+
+    @PUT("notifications/read/{id}")
+    Call<ResponseBody> markNotificationRead(
+            @Header("Authorization") String token,
+            @Path("id") int id
+    );
+
+    @DELETE("notifications/delete/{id}")
+    Call<ResponseBody> deleteNotification(
+            @Header("Authorization") String token,
+            @Path("id") int id
+    );
 }

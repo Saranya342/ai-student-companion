@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add Bag Item 🎒"
+        android:text="Add Bag Item ðŸŽ’"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -46,7 +46,7 @@
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_weight="1"
-            android:text="📚 Books"
+            android:text="ðŸ“š Books"
             android:textColor="#FFFFFF"
             android:textSize="11sp"
             android:gravity="center"
@@ -58,7 +58,7 @@
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_weight="1"
-            android:text="✏️ Stationery"
+            android:text="âœï¸ Stationery"
             android:textColor="#FFFFFF"
             android:textSize="11sp"
             android:gravity="center"
@@ -70,7 +70,7 @@
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_weight="1"
-            android:text="🧪 Lab"
+            android:text="ðŸ§ª Lab"
             android:textColor="#FFFFFF"
             android:textSize="11sp"
             android:gravity="center"
@@ -82,7 +82,7 @@
             android:layout_width="0dp"
             android:layout_height="36dp"
             android:layout_weight="1"
-            android:text="👤 Personal"
+            android:text="ðŸ‘¤ Personal"
             android:textColor="#FFFFFF"
             android:textSize="11sp"
             android:gravity="center"
@@ -91,3 +91,5 @@
     </LinearLayout>
 
 </LinearLayout>
+
+

@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:background="#0D0D0D">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,7 +21,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🎒 Smart Bag"
+                android:text="Smart Bag"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
                 android:textStyle="bold"/>
@@ -48,7 +47,6 @@
 
     </LinearLayout>
 
-    <!-- Progress Card -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -98,7 +96,6 @@
 
     </LinearLayout>
 
-    <!-- Day Selector -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -181,7 +178,6 @@
 
     </HorizontalScrollView>
 
-    <!-- Category Filter -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -213,7 +209,7 @@
                 android:id="@+id/catBooks"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:text="📚 Books"
+                android:text="Books"
                 android:textColor="#FFFFFF"
                 android:textSize="11sp"
                 android:gravity="center"
@@ -226,7 +222,7 @@
                 android:id="@+id/catStationery"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:text="✏️ Stationery"
+                android:text="Stationery"
                 android:textColor="#FFFFFF"
                 android:textSize="11sp"
                 android:gravity="center"
@@ -239,7 +235,7 @@
                 android:id="@+id/catLab"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:text="🧪 Lab"
+                android:text="Lab"
                 android:textColor="#FFFFFF"
                 android:textSize="11sp"
                 android:gravity="center"
@@ -252,7 +248,7 @@
                 android:id="@+id/catPersonal"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:text="👤 Personal"
+                android:text="Personal"
                 android:textColor="#FFFFFF"
                 android:textSize="11sp"
                 android:gravity="center"
@@ -264,76 +260,12 @@
 
     </HorizontalScrollView>
 
-    <!-- Bag Items List -->
     <ScrollView
         android:id="@+id/rvBagItems"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-    <!-- Bottom Navigation -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:orientation="horizontal"
-        android:background="#1A1A1A"
-        android:gravity="center">
-
-        <TextView
-            android:id="@+id/navChat"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="💬&#10;Chat"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navPlanner"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="📅&#10;Planner"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navBag"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="🎒&#10;Bag"
-            android:textColor="#B388FF"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navMemories"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="✨&#10;Memories"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-        <TextView
-            android:id="@+id/navProfile"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="👤&#10;Profile"
-            android:textColor="#555555"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:padding="8dp"/>
-
-    </LinearLayout>
+    <include layout="@layout/view_bottom_nav"/>
 
 </LinearLayout>

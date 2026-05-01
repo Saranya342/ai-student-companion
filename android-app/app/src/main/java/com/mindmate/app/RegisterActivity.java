@@ -60,7 +60,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 if (response.isSuccessful()) {
                     Toast.makeText(RegisterActivity.this,
-                            "Registered successfully! Please login 🎉",
+                            "Registered successfully! Please login ðŸŽ‰",
                             Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
                     finish();

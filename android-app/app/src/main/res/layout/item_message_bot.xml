@@ -13,8 +13,7 @@
         android:layout_height="wrap_content"
         android:maxWidth="260dp"
         android:padding="12dp"
-        android:textColor="#FFFFFF"
+        android:textColor="?attr/colorOnSurface"
         android:textSize="14sp"
         android:background="@drawable/bubble_bot"/>
-
 </LinearLayout>

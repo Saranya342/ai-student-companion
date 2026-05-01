@@ -1,0 +1,89 @@
+﻿===== FILE: app\src\main\java\com\mindmate\app\model\AgentChatResponse.java =====
+package com.mindmate.app.model;
+
+import java.util.List;
+
+public class AgentChatResponse {
+    private String response;
+    private String emotion_detected;
+    private String vibe_detected;
+    private List<String> agents_used;
+    private int tasks_extracted;
+    private int tasks_added_to_planner;
+
+    public String getResponse() { return response; }
+    public String getEmotionDetected() { return emotion_detected; }
+    public String getVibeDetected() { return vibe_detected; }
+    public List<String> getAgentsUsed() { return agents_used; }
+    public int getTasksExtracted() { return tasks_extracted; }
+    public int getTasksAddedToPlanner() { return tasks_added_to_planner; }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\model\ChatRequest.java =====
+package com.mindmate.app.model;
+
+public class ChatRequest {
+    private String message;
+
+    public ChatRequest(String message) {
+        this.message = message;
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\model\ChatResponse.java =====
+package com.mindmate.app.model;
+
+public class ChatResponse {
+    private String your_message;
+    private String bot_reply;
+    private int chat_id;
+
+    public String getBotReply() {
+        return bot_reply;
+    }
+
+    public String getYourMessage() {
+        return your_message;
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\model\LoginRequest.java =====
+package com.mindmate.app.model;
+
+public class LoginRequest {
+    private String email;
+    private String password;
+
+    public LoginRequest(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\model\LoginResponse.java =====
+package com.mindmate.app.model;
+
+public class LoginResponse {
+    private String access_token;
+    private String token_type;
+
+    public String getAccessToken() {
+        return access_token;
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\model\RegisterRequest.java =====
+package com.mindmate.app.model;
+
+public class RegisterRequest {
+    private String name;
+    private String email;
+    private String password;
+
+    public RegisterRequest(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
+}
+

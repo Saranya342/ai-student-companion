@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:background="?attr/colorBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical"
+        android:background="?attr/colorSurface">
+
+        <ImageView
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:src="@drawable/robot"
+            android:scaleType="centerCrop"
+            android:background="@drawable/circle_purple"
+            android:padding="6dp"
+            android:layout_marginEnd="12dp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Study Buddy"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Online"
+                android:textColor="@color/mm_success"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMessages"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp"
+        android:clipToPadding="false" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/chipRemind"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remind me"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="12sp"
+                android:padding="10dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_dark" />
+
+            <TextView
+                android:id="@+id/chipStressed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="I feel stressed"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="12sp"
+                android:padding="10dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_dark" />
+
+            <TextView
+                android:id="@+id/chipPlan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Plan my day"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="12sp"
+                android:padding="10dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/chip_dark" />
+
+            <TextView
+                android:id="@+id/chipBag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="What to carry?"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="12sp"
+                android:padding="10dp"
+                android:background="@drawable/chip_dark" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="?attr/colorSurface">
+
+        <EditText
+            android:id="@+id/etMessage"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:hint="Type a message..."
+            android:textColor="?attr/colorOnSurface"
+            android:textColorHint="@color/mm_text_secondary"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="@drawable/edittext_dark"
+            android:layout_marginEnd="8dp"
+            android:imeOptions="actionSend"
+            android:inputType="textMultiLine" />
+
+        <Button
+            android:id="@+id/btnSend"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text=">"
+            android:textSize="18sp"
+            android:padding="0dp"
+            android:textColor="@color/mm_on_accent"
+            android:backgroundTint="@color/mm_accent" />
+    </LinearLayout>
+
+    <include layout="@layout/view_bottom_nav" />
+</LinearLayout>
+
+

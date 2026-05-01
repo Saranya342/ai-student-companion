@@ -1,0 +1,163 @@
+﻿===== FILE: app\src\main\java\com\mindmate\app\network\ApiClient.java =====
+package com.mindmate.app.network;
+
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import java.util.concurrent.TimeUnit;
+
+public class ApiClient {
+
+    private static final String BASE_URL = "http://10.223.138.245:8000/";
+    private static Retrofit retrofit = null;
+
+    public static Retrofit getClient() {
+        if (retrofit == null) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .addInterceptor(logging)
+                    .connectTimeout(60, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS)
+                    .callTimeout(60, TimeUnit.SECONDS)
+                    .build();
+
+            retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .client(client)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+        }
+        return retrofit;
+    }
+
+    public static ApiService getService() {
+        return getClient().create(ApiService.class);
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\network\ApiService.java =====
+package com.mindmate.app.network;
+
+import com.mindmate.app.model.LoginRequest;
+import com.mindmate.app.model.LoginResponse;
+import com.mindmate.app.model.RegisterRequest;
+import com.mindmate.app.model.ChatRequest;
+import com.mindmate.app.model.ChatResponse;
+import com.mindmate.app.model.AgentChatResponse;
+
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Path;
+
+public interface ApiService {
+
+    // ---------- AUTH ----------
+    @POST("users/register")
+    Call<Void> register(@Body RegisterRequest request);
+
+    @POST("users/login")
+    Call<LoginResponse> login(@Body LoginRequest request);
+
+    // ---------- CHAT ----------
+    @POST("chat/send")
+    Call<ChatResponse> sendMessage(
+            @Header("Authorization") String token,
+            @Body ChatRequest request);
+
+    // âœ… Multi-agent chat
+    @POST("chat/agent")
+    Call<AgentChatResponse> agentChat(
+            @Header("Authorization") String token,
+            @Body ChatRequest request);
+
+    // âœ… Load chat history so chat doesn't reset when switching tabs
+    @GET("chat/agent/history")
+    Call<ResponseBody> getAgentChatHistory(@Header("Authorization") String token);
+
+    @GET("chat/history")
+    Call<ResponseBody> getChatHistory(@Header("Authorization") String token);
+
+    // ---------- PLANNER ----------
+    @GET("planner/tasks")
+    Call<ResponseBody> getTasks(@Header("Authorization") String token);
+
+    @POST("planner/tasks/add")
+    Call<ResponseBody> addTask(
+            @Header("Authorization") String token,
+            @Body RequestBody body);
+
+    @PUT("planner/tasks/complete/{id}")
+    Call<ResponseBody> completeTask(
+            @Header("Authorization") String token,
+            @Path("id") int id);
+
+    @DELETE("planner/tasks/delete/{id}")
+    Call<ResponseBody> deleteTask(
+            @Header("Authorization") String token,
+            @Path("id") int id);
+
+    @GET("planner/tasks/ai-plan")
+    Call<ResponseBody> getAiPlan(@Header("Authorization") String token);
+
+    // ---------- BAG ----------
+    @GET("bag/day/{day}")
+    Call<ResponseBody> getBagItems(
+            @Header("Authorization") String token,
+            @Path("day") String day);
+
+    @POST("bag/item/add")
+    Call<ResponseBody> addBagItem(
+            @Header("Authorization") String token,
+            @Body RequestBody body);
+
+    @PUT("bag/item/check/{id}")
+    Call<ResponseBody> checkBagItem(
+            @Header("Authorization") String token,
+            @Path("id") int id,
+            @Body RequestBody body);
+
+    @DELETE("bag/item/delete/{id}")
+    Call<ResponseBody> deleteBagItem(
+            @Header("Authorization") String token,
+            @Path("id") int id);
+
+    // ---------- MEMORY ----------
+    @GET("memory/history")
+    Call<ResponseBody> getMemories(@Header("Authorization") String token);
+
+    @POST("memory/add")
+    Call<ResponseBody> addMemory(
+            @Header("Authorization") String token,
+            @Body RequestBody body);
+
+    @DELETE("memory/{id}")
+    Call<ResponseBody> deleteMemory(
+            @Header("Authorization") String token,
+            @Path("id") int id);
+
+    // ---------- JOURNAL ----------
+    @GET("journal/thought-parking")
+    Call<ResponseBody> getThoughtParking(@Header("Authorization") String token);
+
+    @POST("journal/thought-parking")
+    Call<ResponseBody> addThoughtParking(
+            @Header("Authorization") String token,
+            @Body RequestBody body);
+
+    @DELETE("journal/thought-parking/{id}")
+    Call<ResponseBody> deleteThoughtParking(
+            @Header("Authorization") String token,
+            @Path("id") int id);
+}
+

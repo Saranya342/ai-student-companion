@@ -1,0 +1,2168 @@
+﻿===== FILE: app\src\main\java\com\mindmate\app\BagActivity.java =====
+package com.mindmate.app;
+
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.mindmate.app.network.ApiClient;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class BagActivity extends AppCompatActivity {
+
+    TextView navChat, navPlanner, navMemories, navProfile;
+    TextView dayMon, dayTue, dayWed, dayThu, dayFri, daySat;
+    TextView tvProgressLabel, tvProgressCount, btnAddItem;
+    TextView catAll, catBooks, catStationery, catLab, catPersonal;
+    ProgressBar progressBar;
+    LinearLayout bagContainer;
+    String token;
+    String selectedDay = "Monday";
+    String selectedItemCategory = "Books";
+    Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    List<JSONObject> allItems = new ArrayList<>();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_bag);
+
+        SharedPreferences prefs = getSharedPreferences("MindMate", MODE_PRIVATE);
+        token = "Bearer " + prefs.getString("token", "");
+
+        tvProgressLabel = findViewById(R.id.tvProgressLabel);
+        tvProgressCount = findViewById(R.id.tvProgressCount);
+        progressBar = findViewById(R.id.progressBar);
+        btnAddItem = findViewById(R.id.btnAddItem);
+
+        dayMon = findViewById(R.id.dayMon);
+        dayTue = findViewById(R.id.dayTue);
+        dayWed = findViewById(R.id.dayWed);
+        dayThu = findViewById(R.id.dayThu);
+        dayFri = findViewById(R.id.dayFri);
+        daySat = findViewById(R.id.daySat);
+
+        catAll = findViewById(R.id.catAll);
+        catBooks = findViewById(R.id.catBooks);
+        catStationery = findViewById(R.id.catStationery);
+        catLab = findViewById(R.id.catLab);
+        catPersonal = findViewById(R.id.catPersonal);
+
+        navChat = findViewById(R.id.navChat);
+        navPlanner = findViewById(R.id.navPlanner);
+        navMemories = findViewById(R.id.navMemories); // Journal
+        navProfile = findViewById(R.id.navProfile);
+
+        bagContainer = new LinearLayout(this);
+        bagContainer.setOrientation(LinearLayout.VERTICAL);
+        bagContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        ScrollView scrollView = findViewById(R.id.rvBagItems);
+        scrollView.addView(bagContainer);
+
+        loadBagItems(selectedDay);
+        highlightDay(dayMon);
+
+        dayMon.setOnClickListener(v -> { selectedDay = "Monday"; loadBagItems(selectedDay); highlightDay(dayMon); });
+        dayTue.setOnClickListener(v -> { selectedDay = "Tuesday"; loadBagItems(selectedDay); highlightDay(dayTue); });
+        dayWed.setOnClickListener(v -> { selectedDay = "Wednesday"; loadBagItems(selectedDay); highlightDay(dayWed); });
+        dayThu.setOnClickListener(v -> { selectedDay = "Thursday"; loadBagItems(selectedDay); highlightDay(dayThu); });
+        dayFri.setOnClickListener(v -> { selectedDay = "Friday"; loadBagItems(selectedDay); highlightDay(dayFri); });
+        daySat.setOnClickListener(v -> { selectedDay = "Saturday"; loadBagItems(selectedDay); highlightDay(daySat); });
+
+        catAll.setOnClickListener(v -> displayItems(allItems));
+        catBooks.setOnClickListener(v -> filterByCategory("books"));
+        catStationery.setOnClickListener(v -> filterByCategory("stationery"));
+        catLab.setOnClickListener(v -> filterByCategory("lab"));
+        catPersonal.setOnClickListener(v -> filterByCategory("personal"));
+
+        btnAddItem.setOnClickListener(v -> showAddItemDialog());
+
+        // Bottom nav
+        navChat.setOnClickListener(v -> { startActivity(new Intent(this, HomeActivity.class)); finish(); });
+        navPlanner.setOnClickListener(v -> { startActivity(new Intent(this, PlannerActivity.class)); finish(); });
+
+        // âœ… UPDATED: Memories -> JournalActivity
+        navMemories.setOnClickListener(v -> { startActivity(new Intent(this, JournalActivity.class)); finish(); });
+
+        navProfile.setOnClickListener(v -> { startActivity(new Intent(this, ProfileActivity.class)); finish(); });
+    }
+
+    private void highlightDay(TextView selected) {
+        dayMon.setBackgroundResource(R.drawable.chip_dark);
+        dayTue.setBackgroundResource(R.drawable.chip_dark);
+        dayWed.setBackgroundResource(R.drawable.chip_dark);
+        dayThu.setBackgroundResource(R.drawable.chip_dark);
+        dayFri.setBackgroundResource(R.drawable.chip_dark);
+        daySat.setBackgroundResource(R.drawable.chip_dark);
+        selected.setBackgroundResource(R.drawable.chip_purple);
+
+        String shortDay = selectedDay.substring(0, 3).toUpperCase();
+        tvProgressLabel.setText(shortDay + " CHECKLIST");
+    }
+
+    private void filterByCategory(String category) {
+        List<JSONObject> filtered = new ArrayList<>();
+        for (JSONObject item : allItems) {
+            try {
+                String itemCat = item.optString("category", "personal").toLowerCase();
+                if (itemCat.equals(category)) filtered.add(item);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        displayItems(filtered);
+    }
+
+    private String getEmojiForItem(String itemName) {
+        String name = itemName.toLowerCase();
+        if (name.contains("notebook") || name.contains("book") || name.contains("record")) return "ðŸ““";
+        if (name.contains("pen") || name.contains("pencil")) return "âœï¸";
+        if (name.contains("water")) return "ðŸ’§";
+        if (name.contains("id") || name.contains("card")) return "ðŸªª";
+        if (name.contains("lab") || name.contains("coat")) return "ðŸ¥¼";
+        if (name.contains("calculator")) return "ðŸ”¢";
+        if (name.contains("charger")) return "ðŸ”Œ";
+        if (name.contains("laptop")) return "ðŸ’»";
+        return "ðŸ“¦";
+    }
+
+    private void loadBagItems(String day) {
+        bagContainer.removeAllViews();
+        allItems.clear();
+
+        ApiClient.getService().getBagItems(token, day)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        mainHandler.post(() -> {
+                            try {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    String json = response.body().string();
+                                    JSONObject obj = new JSONObject(json);
+                                    JSONArray items = obj.getJSONArray("items");
+                                    int total = obj.getInt("total");
+                                    int checked = obj.getInt("checked");
+
+                                    allItems.clear();
+                                    for (int i = 0; i < items.length(); i++) {
+                                        allItems.add(items.getJSONObject(i));
+                                    }
+
+                                    updateProgress(checked, total);
+                                    displayItems(allItems);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        mainHandler.post(() ->
+                                Toast.makeText(BagActivity.this,
+                                        "Failed to load items",
+                                        Toast.LENGTH_SHORT).show());
+                    }
+                });
+    }
+
+    private void updateProgress(int checked, int total) {
+        tvProgressCount.setText(checked + "/" + total + " packed");
+        if (total > 0) {
+            int progress = (checked * 100) / total;
+            progressBar.setProgress(progress);
+        } else {
+            progressBar.setProgress(0);
+        }
+    }
+
+    private void displayItems(List<JSONObject> items) {
+        bagContainer.removeAllViews();
+
+        if (items.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText("No items here!\nTap + to add items ðŸŽ’");
+            empty.setTextColor(0xFF888888);
+            empty.setTextSize(14);
+            empty.setGravity(android.view.Gravity.CENTER);
+            empty.setPadding(32, 64, 32, 32);
+            bagContainer.addView(empty);
+            return;
+        }
+
+        for (JSONObject item : items) {
+            try {
+                addBagItemView(
+                        item.getInt("id"),
+                        item.getString("item_name"),
+                        item.getString("is_checked").equals("true")
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void addBagItemView(int id, String name, boolean isChecked) {
+        View itemView = LayoutInflater.from(this)
+                .inflate(R.layout.item_bag, bagContainer, false);
+
+        TextView tvEmoji = itemView.findViewById(R.id.tvItemEmoji);
+        TextView tvName = itemView.findViewById(R.id.tvBagItemName);
+        TextView btnDelete = itemView.findViewById(R.id.btnDeleteItem);
+        CheckBox checkBox = itemView.findViewById(R.id.checkBagItem);
+
+        tvEmoji.setText(getEmojiForItem(name));
+        tvName.setText(name);
+        checkBox.setChecked(isChecked);
+
+        if (isChecked) {
+            tvName.setPaintFlags(tvName.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+            tvName.setTextColor(0xFF555555);
+        }
+
+        checkBox.setOnCheckedChangeListener((btn, checked) -> updateItemCheck(id, checked));
+
+        btnDelete.setOnClickListener(v -> showDeleteConfirm(id, name));
+
+        bagContainer.addView(itemView);
+    }
+
+    private void showDeleteConfirm(int id, String name) {
+        new AlertDialog.Builder(this)
+                .setTitle("Remove Item?")
+                .setMessage("Remove \"" + name + "\" from " + selectedDay + "'s bag?")
+                .setPositiveButton("Remove", (dialog, which) -> deleteItem(id))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteItem(int itemId) {
+        ApiClient.getService().deleteBagItem(token, itemId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        mainHandler.post(() -> loadBagItems(selectedDay));
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        mainHandler.post(() ->
+                                Toast.makeText(BagActivity.this, "Failed to remove!", Toast.LENGTH_SHORT).show());
+                    }
+                });
+    }
+
+    private void showAddItemDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_add_bag_item, null);
+        builder.setView(dialogView);
+
+        EditText etItemName = dialogView.findViewById(R.id.etItemName);
+
+        builder.setTitle("Add to " + selectedDay + "'s Bag ðŸŽ’");
+        builder.setPositiveButton("Add âœ…", (dialog, which) -> {
+            String itemName = etItemName.getText().toString().trim();
+            if (itemName.isEmpty()) {
+                Toast.makeText(this, "Please enter item name!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            addBagItem(itemName);
+        });
+
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+    private void addBagItem(String itemName) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("day", selectedDay);
+            json.put("item_name", itemName);
+
+            RequestBody body = RequestBody.create(
+                    MediaType.parse("application/json"),
+                    json.toString()
+            );
+
+            ApiClient.getService().addBagItem(token, body)
+                    .enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            mainHandler.post(() -> loadBagItems(selectedDay));
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            mainHandler.post(() ->
+                                    Toast.makeText(BagActivity.this, "Connection failed!", Toast.LENGTH_SHORT).show());
+                        }
+                    });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateItemCheck(int itemId, boolean checked) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("is_checked", checked ? "true" : "false");
+
+            RequestBody body = RequestBody.create(
+                    MediaType.parse("application/json"),
+                    json.toString()
+            );
+
+            ApiClient.getService().checkBagItem(token, itemId, body)
+                    .enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            mainHandler.post(() -> loadBagItems(selectedDay));
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            mainHandler.post(() ->
+                                    Toast.makeText(BagActivity.this, "Update failed!", Toast.LENGTH_SHORT).show());
+                        }
+                    });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\ChatAdapter.java =====
+package com.mindmate.app;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.List;
+
+public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHolder> {
+
+    private static final int TYPE_USER = 1;
+    private static final int TYPE_BOT = 2;
+    private List<ChatMessage> messages;
+
+    public ChatAdapter(List<ChatMessage> messages) {
+        this.messages = messages;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return messages.get(position).isUser() ? TYPE_USER : TYPE_BOT;
+    }
+
+    @NonNull
+    @Override
+    public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        int layout = (viewType == TYPE_USER)
+                ? R.layout.item_message_user
+                : R.layout.item_message_bot;
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(layout, parent, false);
+        return new MessageViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
+        String text = messages.get(position).getText();
+        if (holder.tvMessage != null) {
+            holder.tvMessage.setText(text);
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return messages.size();
+    }
+
+    static class MessageViewHolder extends RecyclerView.ViewHolder {
+        TextView tvMessage;
+
+        MessageViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvMessage = itemView.findViewById(R.id.tvMessage);
+        }
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\ChatMessage.java =====
+package com.mindmate.app;
+
+public class ChatMessage {
+    private String text;
+    private boolean isUser;
+
+    public ChatMessage(String text, boolean isUser) {
+        this.text = text;
+        this.isUser = isUser;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public boolean isUser() {
+        return isUser;
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\HomeActivity.java =====
+package com.mindmate.app;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.mindmate.app.model.AgentChatResponse;
+import com.mindmate.app.model.ChatRequest;
+import com.mindmate.app.network.ApiClient;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class HomeActivity extends AppCompatActivity {
+
+    RecyclerView rvMessages;
+    EditText etMessage;
+    Button btnSend;
+    TextView chipRemind, chipStressed, chipPlan, chipBag;
+    TextView navPlanner, navBag, navMemories, navProfile;
+
+    List<ChatMessage> messages = new ArrayList<>();
+    ChatAdapter adapter;
+    String token;
+    boolean isWaiting = false;
+    boolean historyLoadedOnce = false;
+
+    Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_home);
+
+        SharedPreferences prefs = getSharedPreferences("MindMate", MODE_PRIVATE);
+        token = "Bearer " + prefs.getString("token", "");
+
+        rvMessages = findViewById(R.id.rvMessages);
+        etMessage = findViewById(R.id.etMessage);
+        btnSend = findViewById(R.id.btnSend);
+        chipRemind = findViewById(R.id.chipRemind);
+        chipStressed = findViewById(R.id.chipStressed);
+        chipPlan = findViewById(R.id.chipPlan);
+        chipBag = findViewById(R.id.chipBag);
+
+        navPlanner = findViewById(R.id.navPlanner);
+        navBag = findViewById(R.id.navBag);
+        navMemories = findViewById(R.id.navMemories); // Journal tab text, id unchanged
+        navProfile = findViewById(R.id.navProfile);
+
+        adapter = new ChatAdapter(messages);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setStackFromEnd(true);
+        rvMessages.setLayoutManager(layoutManager);
+        rvMessages.setAdapter(adapter);
+
+        btnSend.setOnClickListener(v -> sendMessage());
+
+        chipRemind.setOnClickListener(v -> sendQuickMessage("Remind me about something"));
+        chipStressed.setOnClickListener(v -> sendQuickMessage("I feel stressed"));
+        chipPlan.setOnClickListener(v -> sendQuickMessage("Plan my day"));
+        chipBag.setOnClickListener(v -> sendQuickMessage("What should I carry tomorrow?"));
+
+        navPlanner.setOnClickListener(v -> {
+            startActivity(new Intent(this, PlannerActivity.class));
+            finish();
+        });
+
+        navBag.setOnClickListener(v -> {
+            startActivity(new Intent(this, BagActivity.class));
+            finish();
+        });
+
+        // Journal
+        navMemories.setOnClickListener(v -> {
+            startActivity(new Intent(this, JournalActivity.class));
+            finish();
+        });
+
+        navProfile.setOnClickListener(v -> {
+            startActivity(new Intent(this, ProfileActivity.class));
+            finish();
+        });
+
+        // Load chat history from backend
+        loadChatHistory();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // reload only once per open to avoid flicker
+        if (!historyLoadedOnce) {
+            loadChatHistory();
+        }
+    }
+
+    private void loadChatHistory() {
+        ApiClient.getService().getAgentChatHistory(token)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        mainHandler.post(() -> {
+                            try {
+                                historyLoadedOnce = true;
+
+                                if (!response.isSuccessful() || response.body() == null) {
+                                    if (messages.isEmpty()) addBotMessage("Hello. How can I help you today?");
+                                    return;
+                                }
+
+                                String json = response.body().string();
+                                JSONObject obj = new JSONObject(json);
+                                JSONArray chats = obj.getJSONArray("chats");
+
+                                messages.clear();
+
+                                for (int i = 0; i < chats.length(); i++) {
+                                    JSONObject c = chats.getJSONObject(i);
+                                    String userMsg = c.getString("message");
+                                    String botMsg = c.getString("response");
+
+                                    messages.add(new ChatMessage(userMsg, true));
+                                    messages.add(new ChatMessage(botMsg, false));
+                                }
+
+                                adapter.notifyDataSetChanged();
+
+                                if (messages.isEmpty()) {
+                                    addBotMessage("Hello. How can I help you today?");
+                                } else {
+                                    rvMessages.scrollToPosition(messages.size() - 1);
+                                }
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                if (messages.isEmpty()) addBotMessage("Hello. How can I help you today?");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        mainHandler.post(() -> {
+                            if (messages.isEmpty()) addBotMessage("Hello. How can I help you today?");
+                        });
+                    }
+                });
+    }
+
+    private void sendQuickMessage(String message) {
+        etMessage.setText(message);
+        sendMessage();
+    }
+
+    private void sendMessage() {
+        if (isWaiting) {
+            Toast.makeText(this, "Please wait...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String message = etMessage.getText().toString().trim();
+        if (message.isEmpty()) return;
+
+        addUserMessage(message);
+        etMessage.setText("");
+
+        isWaiting = true;
+        btnSend.setEnabled(false);
+        addBotMessage("typing...");
+
+        ChatRequest request = new ChatRequest(message);
+
+        ApiClient.getService().agentChat(token, request)
+                .enqueue(new Callback<AgentChatResponse>() {
+                    @Override
+                    public void onResponse(Call<AgentChatResponse> call, Response<AgentChatResponse> response) {
+                        mainHandler.post(() -> {
+                            removeLastMessage();
+                            isWaiting = false;
+                            btnSend.setEnabled(true);
+
+                            if (response.isSuccessful() && response.body() != null) {
+                                addBotMessage(response.body().getResponse());
+                            } else {
+                                addBotMessage("Something went wrong. Please try again.");
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<AgentChatResponse> call, Throwable t) {
+                        mainHandler.post(() -> {
+                            removeLastMessage();
+                            isWaiting = false;
+                            btnSend.setEnabled(true);
+                            addBotMessage("Cannot connect to server. Is backend running?");
+                        });
+                    }
+                });
+    }
+
+    private void addUserMessage(String text) {
+        messages.add(new ChatMessage(text, true));
+        adapter.notifyItemInserted(messages.size() - 1);
+        rvMessages.scrollToPosition(messages.size() - 1);
+    }
+
+    private void addBotMessage(String text) {
+        messages.add(new ChatMessage(text, false));
+        adapter.notifyItemInserted(messages.size() - 1);
+        rvMessages.scrollToPosition(messages.size() - 1);
+    }
+
+    private void removeLastMessage() {
+        if (!messages.isEmpty()) {
+            messages.remove(messages.size() - 1);
+            adapter.notifyItemRemoved(messages.size());
+        }
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\JournalActivity.java =====
+package com.mindmate.app;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.mindmate.app.network.ApiClient;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.Calendar;
+import java.util.Locale;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class JournalActivity extends AppCompatActivity {
+
+    // Tabs
+    private TextView tabThought, tabFuture;
+    private LinearLayout thoughtLayout, futureLayout;
+
+    // Thought Parking UI
+    private EditText etThought;
+    private TextView btnSendThought;
+    private LinearLayout thoughtContainer;
+
+    // Future You UI
+    private EditText etFuture;
+    private Button btnSendFuture;
+    private LinearLayout futureContainer;
+
+    // Bottom Nav
+    private TextView navChat, navPlanner, navBag, navMemories, navProfile;
+
+    private String token;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_journal);
+
+        SharedPreferences prefs = getSharedPreferences("MindMate", MODE_PRIVATE);
+        token = "Bearer " + prefs.getString("token", "");
+
+        tabThought = findViewById(R.id.tabThought);
+        tabFuture = findViewById(R.id.tabFuture);
+        thoughtLayout = findViewById(R.id.thoughtLayout);
+        futureLayout = findViewById(R.id.futureLayout);
+
+        etThought = findViewById(R.id.etThought);
+        btnSendThought = findViewById(R.id.btnSendThought);
+        thoughtContainer = findViewById(R.id.thoughtContainer);
+
+        etFuture = findViewById(R.id.etFuture);
+        btnSendFuture = findViewById(R.id.btnSendFuture);
+        futureContainer = findViewById(R.id.futureContainer);
+
+        navChat = findViewById(R.id.navChat);
+        navPlanner = findViewById(R.id.navPlanner);
+        navBag = findViewById(R.id.navBag);
+        navMemories = findViewById(R.id.navMemories); // Journal itself
+        navProfile = findViewById(R.id.navProfile);
+
+        // Tabs click
+        tabThought.setOnClickListener(v -> showThought());
+        tabFuture.setOnClickListener(v -> showFuture());
+
+        // Add thought
+        btnSendThought.setOnClickListener(v -> {
+            String text = etThought.getText().toString().trim();
+            if (text.isEmpty()) {
+                Toast.makeText(this, "Type a thought first", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            addThought(text);
+        });
+
+        // Add future letter
+        btnSendFuture.setOnClickListener(v -> {
+            String text = etFuture.getText().toString().trim();
+            if (text.isEmpty()) {
+                Toast.makeText(this, "Write something first", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            addFutureLetter(text);
+        });
+
+        // Bottom nav
+        navChat.setOnClickListener(v -> { startActivity(new Intent(this, HomeActivity.class)); finish(); });
+        navPlanner.setOnClickListener(v -> { startActivity(new Intent(this, PlannerActivity.class)); finish(); });
+        navBag.setOnClickListener(v -> { startActivity(new Intent(this, BagActivity.class)); finish(); });
+        // navMemories is current
+        navProfile.setOnClickListener(v -> { startActivity(new Intent(this, ProfileActivity.class)); finish(); });
+
+        // Default screen
+        showThought();
+
+        // Load data
+        loadThoughts();
+        loadFutureLetters();
+    }
+
+    private void showThought() {
+        thoughtLayout.setVisibility(View.VISIBLE);
+        futureLayout.setVisibility(View.GONE);
+        tabThought.setBackgroundResource(R.drawable.chip_purple);
+        tabFuture.setBackgroundResource(R.drawable.chip_dark);
+    }
+
+    private void showFuture() {
+        thoughtLayout.setVisibility(View.GONE);
+        futureLayout.setVisibility(View.VISIBLE);
+        tabThought.setBackgroundResource(R.drawable.chip_dark);
+        tabFuture.setBackgroundResource(R.drawable.chip_purple);
+    }
+
+    // ---------------- THOUGHT PARKING (Journal endpoints) ----------------
+
+    private void loadThoughts() {
+        ApiClient.getService().getThoughtParking(token)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        try {
+                            if (!response.isSuccessful() || response.body() == null) {
+                                Toast.makeText(JournalActivity.this,
+                                        "Thought load failed: " + response.code(),
+                                        Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            String json = response.body().string();
+                            JSONObject obj = new JSONObject(json);
+                            JSONArray thoughts = obj.getJSONArray("thoughts");
+
+                            thoughtContainer.removeAllViews();
+
+                            if (thoughts.length() == 0) {
+                                addEmpty(thoughtContainer, "No thoughts yet.");
+                                return;
+                            }
+
+                            for (int i = 0; i < thoughts.length(); i++) {
+                                JSONObject t = thoughts.getJSONObject(i);
+                                int id = t.getInt("id");
+                                String content = t.getString("content");
+                                String createdAt = t.optString("created_at", "");
+                                addThoughtCard(id, content, createdAt);
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(JournalActivity.this, "Parse error (thoughts)", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(JournalActivity.this, "Connection failed (thoughts)", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void addThought(String content) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("content", content);
+
+            RequestBody body = RequestBody.create(
+                    MediaType.parse("application/json"),
+                    json.toString()
+            );
+
+            ApiClient.getService().addThoughtParking(token, body)
+                    .enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            if (response.isSuccessful()) {
+                                etThought.setText("");
+                                Toast.makeText(JournalActivity.this, "Thought saved âœ…", Toast.LENGTH_SHORT).show();
+                                loadThoughts();
+                            } else {
+                                Toast.makeText(JournalActivity.this, "Save failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Toast.makeText(JournalActivity.this, "Connection failed (save thought)", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void confirmDeleteThought(int id) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete thought?")
+                .setMessage("Remove this thought?")
+                .setPositiveButton("Delete", (d, w) -> deleteThought(id))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteThought(int id) {
+        ApiClient.getService().deleteThoughtParking(token, id)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            loadThoughts();
+                        } else {
+                            Toast.makeText(JournalActivity.this, "Delete failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(JournalActivity.this, "Connection failed (delete)", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void addThoughtCard(int id, String content, String createdAt) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackgroundResource(R.drawable.card_dark);
+        card.setPadding(28, 22, 28, 22);
+
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        p.setMargins(0, 0, 0, 16);
+        card.setLayoutParams(p);
+
+        TextView tv = new TextView(this);
+        tv.setText(content);
+        tv.setTextColor(0xFFFFFFFF);
+        tv.setTextSize(14);
+
+        TextView dt = new TextView(this);
+        String d = createdAt.length() >= 10 ? createdAt.substring(0, 10) : createdAt;
+        dt.setText(d);
+        dt.setTextColor(0xFF888888);
+        dt.setTextSize(12);
+        dt.setPadding(0, 10, 0, 0);
+
+        TextView del = new TextView(this);
+        del.setText("Delete");
+        del.setTextColor(0xFFFF5252);
+        del.setTextSize(12);
+        del.setPadding(0, 12, 0, 0);
+        del.setOnClickListener(v -> confirmDeleteThought(id));
+
+        card.addView(tv);
+        card.addView(dt);
+        card.addView(del);
+
+        thoughtContainer.addView(card, 0);
+    }
+
+    // ---------------- FUTURE YOU (Memory endpoints) ----------------
+
+    private void loadFutureLetters() {
+        ApiClient.getService().getMemories(token)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        try {
+                            if (!response.isSuccessful() || response.body() == null) {
+                                Toast.makeText(JournalActivity.this,
+                                        "Future load failed: " + response.code(),
+                                        Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            String json = response.body().string();
+                            JSONObject obj = new JSONObject(json);
+                            JSONArray memories = obj.getJSONArray("memories");
+
+                            futureContainer.removeAllViews();
+
+                            int count = 0;
+                            for (int i = 0; i < memories.length(); i++) {
+                                JSONObject m = memories.getJSONObject(i);
+                                String cat = m.optString("category", "");
+                                if (!cat.equalsIgnoreCase("future")) continue;
+
+                                int id = m.getInt("id");
+                                String unlock = m.optString("unlock_date", "");
+                                String content = m.optString("content", "");
+
+                                addFutureCard(id, unlock, content);
+                                count++;
+                            }
+
+                            if (count == 0) {
+                                addEmpty(futureContainer, "No future letters yet.");
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(JournalActivity.this, "Parse error (future)", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(JournalActivity.this, "Connection failed (future)", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void addFutureLetter(String content) {
+        try {
+            // default unlock date = 7 days from now (UI only)
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DAY_OF_YEAR, 7);
+            String unlockDate = String.format(Locale.getDefault(), "%04d-%02d-%02d",
+                    cal.get(Calendar.YEAR),
+                    cal.get(Calendar.MONTH) + 1,
+                    cal.get(Calendar.DAY_OF_MONTH));
+
+            JSONObject json = new JSONObject();
+            json.put("content", content);
+            json.put("category", "future");
+            json.put("unlock_date", unlockDate);
+
+            RequestBody body = RequestBody.create(
+                    MediaType.parse("application/json"),
+                    json.toString()
+            );
+
+            ApiClient.getService().addMemory(token, body)
+                    .enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            if (response.isSuccessful()) {
+                                etFuture.setText("");
+                                Toast.makeText(JournalActivity.this, "Future letter saved âœ…", Toast.LENGTH_SHORT).show();
+                                loadFutureLetters();
+                            } else {
+                                Toast.makeText(JournalActivity.this, "Save failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Toast.makeText(JournalActivity.this, "Connection failed (save future)", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void confirmDeleteFuture(int id) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete future letter?")
+                .setMessage("Remove this future message?")
+                .setPositiveButton("Delete", (d, w) -> deleteFuture(id))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteFuture(int id) {
+        ApiClient.getService().deleteMemory(token, id)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            loadFutureLetters();
+                        } else {
+                            Toast.makeText(JournalActivity.this, "Delete failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(JournalActivity.this, "Connection failed (delete future)", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void addFutureCard(int id, String unlockDate, String content) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackgroundResource(R.drawable.card_dark);
+        card.setPadding(24, 18, 24, 18);
+
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        p.setMargins(0, 0, 0, 14);
+        card.setLayoutParams(p);
+
+        TextView title = new TextView(this);
+        String showUnlock = unlockDate == null || unlockDate.isEmpty() ? "Locked" : unlockDate;
+        title.setText("ðŸ”’ Opens on: " + showUnlock);
+        title.setTextColor(0xFFB388FF);
+        title.setTextSize(12);
+
+        TextView preview = new TextView(this);
+        preview.setText("Message sealed...");
+        preview.setTextColor(0xFF888888);
+        preview.setTextSize(13);
+        preview.setPadding(0, 8, 0, 0);
+
+        TextView del = new TextView(this);
+        del.setText("Delete");
+        del.setTextColor(0xFFFF5252);
+        del.setTextSize(12);
+        del.setPadding(0, 12, 0, 0);
+        del.setOnClickListener(v -> confirmDeleteFuture(id));
+
+        card.addView(title);
+        card.addView(preview);
+        card.addView(del);
+
+        futureContainer.addView(card, 0);
+    }
+
+    private void addEmpty(LinearLayout container, String msg) {
+        TextView t = new TextView(this);
+        t.setText(msg);
+        t.setTextColor(0xFF888888);
+        t.setTextSize(14);
+        t.setGravity(android.view.Gravity.CENTER);
+        t.setPadding(32, 60, 32, 32);
+        container.addView(t);
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\LoginActivity.java =====
+package com.mindmate.app;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.mindmate.app.model.LoginRequest;
+import com.mindmate.app.model.LoginResponse;
+import com.mindmate.app.network.ApiClient;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class LoginActivity extends AppCompatActivity {
+
+    EditText etEmail, etPassword;
+    Button btnLogin;
+    TextView tvRegister;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        etEmail = findViewById(R.id.etEmail);
+        etPassword = findViewById(R.id.etPassword);
+        btnLogin = findViewById(R.id.btnLogin);
+        tvRegister = findViewById(R.id.tvRegister);
+
+        btnLogin.setOnClickListener(v -> loginUser());
+
+        tvRegister.setOnClickListener(v -> {
+            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+        });
+    }
+
+    private void loginUser() {
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
+
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        btnLogin.setEnabled(false);
+        btnLogin.setText("Logging in...");
+
+        LoginRequest request = new LoginRequest(email, password);
+
+        ApiClient.getService().login(request).enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                btnLogin.setEnabled(true);
+                btnLogin.setText("Login");
+
+                if (response.isSuccessful() && response.body() != null) {
+                    String token = response.body().getAccessToken();
+
+                    SharedPreferences prefs = getSharedPreferences("MindMate", MODE_PRIVATE);
+                    prefs.edit().putString("token", token).apply();
+                    prefs.edit().putString("email", email).apply();
+
+                    Toast.makeText(LoginActivity.this, "Welcome back! ðŸŽ‰", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                    finish();
+                } else {
+                    Toast.makeText(LoginActivity.this, "Wrong email or password!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                btnLogin.setEnabled(true);
+                btnLogin.setText("Login");
+                Toast.makeText(LoginActivity.this,
+                        "Connection failed! Is backend running?",
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\MemoriesActivity.java =====
+package com.mindmate.app;
+
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.mindmate.app.network.ApiClient;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class MemoriesActivity extends AppCompatActivity {
+
+    // Header
+    TextView tvMemoryCount, btnSearch, btnCancelSearch;
+    LinearLayout searchLayout;
+    EditText etSearch;
+    Button btnAddMemory;
+
+    // Filter chips
+    TextView chipAll, chipAchievement, chipWin, chipGrowth, chipNote;
+
+    // List container
+    LinearLayout memoryContainer;
+
+    // Bottom nav
+    TextView navChat, navPlanner, navBag, navMemories, navProfile;
+
+    String token;
+    String selectedCategory = "all";
+
+    // Store all memories for filtering/search
+    List<JSONObject> allMemories = new ArrayList<>();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_memories);
+
+        SharedPreferences prefs = getSharedPreferences("MindMate", MODE_PRIVATE);
+        token = "Bearer " + prefs.getString("token", "");
+
+        // Header
+        tvMemoryCount = findViewById(R.id.tvMemoryCount);
+        btnSearch = findViewById(R.id.btnSearch);
+        searchLayout = findViewById(R.id.searchLayout);
+        etSearch = findViewById(R.id.etSearch);
+        btnCancelSearch = findViewById(R.id.btnCancelSearch);
+        btnAddMemory = findViewById(R.id.btnAddMemory);
+
+        // Chips
+        chipAll = findViewById(R.id.chipAll);
+        chipAchievement = findViewById(R.id.chipAchievement);
+        chipWin = findViewById(R.id.chipWin);
+        chipGrowth = findViewById(R.id.chipGrowth);
+        chipNote = findViewById(R.id.chipNote);
+
+        // Bottom nav
+        navChat = findViewById(R.id.navChat);
+        navPlanner = findViewById(R.id.navPlanner);
+        navBag = findViewById(R.id.navBag);
+        navMemories = findViewById(R.id.navMemories); // Journal tab text, id stays same
+        navProfile = findViewById(R.id.navProfile);
+
+        // Container inside ScrollView
+        ScrollView scroll = findViewById(R.id.rvMemories);
+        memoryContainer = new LinearLayout(this);
+        memoryContainer.setOrientation(LinearLayout.VERTICAL);
+        scroll.addView(memoryContainer);
+
+        // Search behavior (icon -> open search)
+        btnSearch.setOnClickListener(v -> {
+            searchLayout.setVisibility(View.VISIBLE);
+            etSearch.requestFocus();
+        });
+
+        btnCancelSearch.setOnClickListener(v -> {
+            searchLayout.setVisibility(View.GONE);
+            etSearch.setText("");
+            applyFiltersAndRender();
+        });
+
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                applyFiltersAndRender();
+            }
+        });
+
+        // Chip filters
+        chipAll.setOnClickListener(v -> { selectedCategory = "all"; updateChips(chipAll); applyFiltersAndRender(); });
+        chipAchievement.setOnClickListener(v -> { selectedCategory = "achievement"; updateChips(chipAchievement); applyFiltersAndRender(); });
+        chipWin.setOnClickListener(v -> { selectedCategory = "win"; updateChips(chipWin); applyFiltersAndRender(); });
+        chipGrowth.setOnClickListener(v -> { selectedCategory = "growth"; updateChips(chipGrowth); applyFiltersAndRender(); });
+        chipNote.setOnClickListener(v -> { selectedCategory = "note"; updateChips(chipNote); applyFiltersAndRender(); });
+
+        // Add memory
+        btnAddMemory.setOnClickListener(v -> showAddMemoryDialog());
+
+        // Bottom nav
+        navChat.setOnClickListener(v -> { startActivity(new Intent(this, HomeActivity.class)); finish(); });
+        navPlanner.setOnClickListener(v -> { startActivity(new Intent(this, PlannerActivity.class)); finish(); });
+        navBag.setOnClickListener(v -> { startActivity(new Intent(this, BagActivity.class)); finish(); });
+
+        // Journal
+        navMemories.setOnClickListener(v -> { startActivity(new Intent(this, JournalActivity.class)); finish(); });
+
+        navProfile.setOnClickListener(v -> { startActivity(new Intent(this, ProfileActivity.class)); finish(); });
+
+        // Default chip selected
+        updateChips(chipAll);
+
+        // Load from backend
+        loadMemories();
+    }
+
+    private void updateChips(TextView selected) {
+        chipAll.setBackgroundResource(R.drawable.chip_dark);
+        chipAchievement.setBackgroundResource(R.drawable.chip_dark);
+        chipWin.setBackgroundResource(R.drawable.chip_dark);
+        chipGrowth.setBackgroundResource(R.drawable.chip_dark);
+        chipNote.setBackgroundResource(R.drawable.chip_dark);
+
+        selected.setBackgroundResource(R.drawable.chip_purple);
+    }
+
+    // ---------------- BACKEND LOAD ----------------
+
+    private void loadMemories() {
+        tvMemoryCount.setText("Loading...");
+
+        ApiClient.getService().getMemories(token).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    if (!response.isSuccessful() || response.body() == null) {
+                        tvMemoryCount.setText("Failed to load");
+                        return;
+                    }
+
+                    String json = response.body().string();
+                    JSONObject obj = new JSONObject(json);
+                    JSONArray arr = obj.getJSONArray("memories");
+
+                    allMemories.clear();
+                    for (int i = 0; i < arr.length(); i++) {
+                        allMemories.add(arr.getJSONObject(i));
+                    }
+
+                    tvMemoryCount.setText(allMemories.size() + " saved");
+
+                    applyFiltersAndRender();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    tvMemoryCount.setText("Error");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                tvMemoryCount.setText("Connection failed");
+            }
+        });
+    }
+
+    // ---------------- FILTER + SEARCH ----------------
+
+    private void applyFiltersAndRender() {
+        String query = etSearch.getText().toString().trim().toLowerCase();
+
+        List<JSONObject> filtered = new ArrayList<>();
+
+        for (JSONObject m : allMemories) {
+            try {
+                String category = m.optString("category", "").toLowerCase();
+                String content = m.optString("content", "");
+
+                // Category filter
+                if (!selectedCategory.equals("all")) {
+                    if (!category.equals(selectedCategory)) continue;
+                }
+
+                // Search filter
+                if (!query.isEmpty()) {
+                    if (!content.toLowerCase().contains(query)) continue;
+                }
+
+                filtered.add(m);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        renderMemories(filtered);
+    }
+
+    private void renderMemories(List<JSONObject> list) {
+        memoryContainer.removeAllViews();
+
+        if (list.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText("No memories found.\nAdd one using +");
+            empty.setTextColor(0xFF888888);
+            empty.setTextSize(14);
+            empty.setGravity(android.view.Gravity.CENTER);
+            empty.setPadding(32, 64, 32, 32);
+            memoryContainer.addView(empty);
+            return;
+        }
+
+        for (JSONObject m : list) {
+            try {
+                int id = m.getInt("id");
+                String content = m.getString("content");
+                String category = m.optString("category", "note");
+                String createdAt = m.optString("created_at", "");
+
+                addMemoryCard(id, content, category, createdAt);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // ---------------- UI CARD ----------------
+
+    private void addMemoryCard(int id, String content, String category, String createdAt) {
+        View item = LayoutInflater.from(this).inflate(R.layout.item_memory, memoryContainer, false);
+
+        TextView tvEmoji = item.findViewById(R.id.tvMemoryEmoji);
+        TextView tvCategory = item.findViewById(R.id.tvMemoryCategory);
+        TextView tvDate = item.findViewById(R.id.tvMemoryDate);
+        TextView tvContent = item.findViewById(R.id.tvMemoryContent);
+
+        TextView btnShare = item.findViewById(R.id.btnShareMemory);
+        TextView btnDelete = item.findViewById(R.id.btnDeleteMemory);
+
+        tvEmoji.setText(emojiFor(category));
+        tvCategory.setText(category.toUpperCase());
+        tvCategory.setTextColor(colorForCategory(category));
+
+        if (createdAt.length() >= 10) tvDate.setText(createdAt.substring(0, 10));
+        else tvDate.setText(createdAt);
+
+        tvContent.setText(content);
+
+        btnShare.setOnClickListener(v -> shareMemory(content, category));
+        btnDelete.setOnClickListener(v -> confirmDelete(id));
+
+        memoryContainer.addView(item);
+    }
+
+    private String emojiFor(String category) {
+        String c = category.toLowerCase();
+        if (c.equals("achievement")) return "ðŸ…";
+        if (c.equals("win")) return "ðŸ†";
+        if (c.equals("growth")) return "ðŸŒ±";
+        if (c.equals("note")) return "ðŸ“";
+        if (c.equals("task")) return "ðŸ“Œ";
+        return "âœ¨";
+    }
+
+    private int colorForCategory(String category) {
+        String c = category.toLowerCase();
+        if (c.equals("achievement")) return 0xFFFFD700;
+        if (c.equals("win")) return 0xFFFFAB00;
+        if (c.equals("growth")) return 0xFF4CAF50;
+        if (c.equals("note")) return 0xFF00BCD4;
+        if (c.equals("task")) return 0xFFB388FF;
+        return 0xFFB388FF;
+    }
+
+    // ---------------- ADD MEMORY ----------------
+
+    private void showAddMemoryDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add Memory");
+
+        View dialog = LayoutInflater.from(this).inflate(R.layout.dialog_add_memory, null);
+        builder.setView(dialog);
+
+        EditText etContent = dialog.findViewById(R.id.etMemoryContent);
+
+        TextView catAchievement = dialog.findViewById(R.id.catAchievement);
+        TextView catWin = dialog.findViewById(R.id.catWin);
+        TextView catGrowth = dialog.findViewById(R.id.catGrowth);
+        TextView catNote = dialog.findViewById(R.id.catNote);
+
+        final String[] chosen = {"achievement"};
+        catAchievement.setBackgroundResource(R.drawable.chip_purple);
+
+        catAchievement.setOnClickListener(v -> {
+            chosen[0] = "achievement";
+            catAchievement.setBackgroundResource(R.drawable.chip_purple);
+            catWin.setBackgroundResource(R.drawable.chip_dark);
+            catGrowth.setBackgroundResource(R.drawable.chip_dark);
+            catNote.setBackgroundResource(R.drawable.chip_dark);
+        });
+
+        catWin.setOnClickListener(v -> {
+            chosen[0] = "win";
+            catAchievement.setBackgroundResource(R.drawable.chip_dark);
+            catWin.setBackgroundResource(R.drawable.chip_purple);
+            catGrowth.setBackgroundResource(R.drawable.chip_dark);
+            catNote.setBackgroundResource(R.drawable.chip_dark);
+        });
+
+        catGrowth.setOnClickListener(v -> {
+            chosen[0] = "growth";
+            catAchievement.setBackgroundResource(R.drawable.chip_dark);
+            catWin.setBackgroundResource(R.drawable.chip_dark);
+            catGrowth.setBackgroundResource(R.drawable.chip_purple);
+            catNote.setBackgroundResource(R.drawable.chip_dark);
+        });
+
+        catNote.setOnClickListener(v -> {
+            chosen[0] = "note";
+            catAchievement.setBackgroundResource(R.drawable.chip_dark);
+            catWin.setBackgroundResource(R.drawable.chip_dark);
+            catGrowth.setBackgroundResource(R.drawable.chip_dark);
+            catNote.setBackgroundResource(R.drawable.chip_purple);
+        });
+
+        builder.setPositiveButton("Save", (d, w) -> {
+            String content = etContent.getText().toString().trim();
+            if (content.isEmpty()) {
+                Toast.makeText(this, "Enter something", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            addMemory(content, chosen[0]);
+        });
+
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+    private void addMemory(String content, String category) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("content", content);
+            json.put("category", category);
+
+            RequestBody body = RequestBody.create(
+                    MediaType.parse("application/json"),
+                    json.toString()
+            );
+
+            ApiClient.getService().addMemory(token, body).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(MemoriesActivity.this, "Saved âœ…", Toast.LENGTH_SHORT).show();
+                        loadMemories();
+                    } else {
+                        Toast.makeText(MemoriesActivity.this, "Failed to save", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Toast.makeText(MemoriesActivity.this, "Connection failed", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ---------------- DELETE ----------------
+
+    private void confirmDelete(int id) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete memory?")
+                .setMessage("This cannot be undone.")
+                .setPositiveButton("Delete", (d, w) -> deleteMemory(id))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void deleteMemory(int id) {
+        ApiClient.getService().deleteMemory(token, id).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(MemoriesActivity.this, "Deleted âœ…", Toast.LENGTH_SHORT).show();
+                    loadMemories();
+                } else {
+                    Toast.makeText(MemoriesActivity.this, "Delete failed", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(MemoriesActivity.this, "Connection failed", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // ---------------- SHARE ----------------
+
+    private void shareMemory(String content, String category) {
+        String text = "MindMate â€“ " + category.toUpperCase() + "\n\n" + content;
+        Intent share = new Intent(Intent.ACTION_SEND);
+        share.setType("text/plain");
+        share.putExtra(Intent.EXTRA_TEXT, text);
+        startActivity(Intent.createChooser(share, "Share Memory"));
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\PlannerActivity.java =====
+package com.mindmate.app;
+
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.mindmate.app.network.ApiClient;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class PlannerActivity extends AppCompatActivity {
+
+    TextView navChat, navBag, navMemories, navProfile;
+    TextView tvProgress, tvDate;
+    Button btnAddTask, btnAiPlan;
+    LinearLayout taskContainer;
+    String token;
+    Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_planner);
+
+        SharedPreferences prefs = getSharedPreferences("MindMate", MODE_PRIVATE);
+        token = "Bearer " + prefs.getString("token", "");
+
+        tvProgress = findViewById(R.id.tvProgress);
+        tvDate = findViewById(R.id.tvDate);
+        btnAddTask = findViewById(R.id.btnAddTask);
+        btnAiPlan = findViewById(R.id.btnAiPlan);
+        taskContainer = findViewById(R.id.taskContainer);
+
+        navChat = findViewById(R.id.navChat);
+        navBag = findViewById(R.id.navBag);
+        navMemories = findViewById(R.id.navMemories); // Journal tab text, id stays same
+        navProfile = findViewById(R.id.navProfile);
+
+        String date = new SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(new Date());
+        tvDate.setText(date);
+
+        loadTasks();
+
+        btnAddTask.setOnClickListener(v -> showAddTaskDialog());
+        btnAiPlan.setOnClickListener(v -> getAiPlan());
+
+        // Bottom nav
+        navChat.setOnClickListener(v -> {
+            startActivity(new Intent(this, HomeActivity.class));
+            finish();
+        });
+
+        navBag.setOnClickListener(v -> {
+            startActivity(new Intent(this, BagActivity.class));
+            finish();
+        });
+
+        // âœ… UPDATED: Memories -> JournalActivity
+        navMemories.setOnClickListener(v -> {
+            startActivity(new Intent(this, JournalActivity.class));
+            finish();
+        });
+
+        navProfile.setOnClickListener(v -> {
+            startActivity(new Intent(this, ProfileActivity.class));
+            finish();
+        });
+    }
+
+    private void loadTasks() {
+        ApiClient.getService().getTasks(token)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call,
+                                           Response<ResponseBody> response) {
+                        mainHandler.post(() -> {
+                            try {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    String json = response.body().string();
+                                    JSONObject obj = new JSONObject(json);
+                                    int total = obj.getInt("total");
+                                    int completed = obj.getInt("completed");
+                                    tvProgress.setText(completed + "/" + total);
+
+                                    JSONArray tasks = obj.getJSONArray("tasks");
+                                    taskContainer.removeAllViews();
+
+                                    for (int i = 0; i < tasks.length(); i++) {
+                                        JSONObject task = tasks.getJSONObject(i);
+                                        addTaskView(
+                                                task.getInt("id"),
+                                                task.getString("title"),
+                                                task.getString("due_date"),
+                                                task.getString("priority"),
+                                                task.getBoolean("is_completed")
+                                        );
+                                    }
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        mainHandler.post(() ->
+                                Toast.makeText(PlannerActivity.this,
+                                        "Failed to load tasks",
+                                        Toast.LENGTH_SHORT).show());
+                    }
+                });
+    }
+
+    private void addTaskView(int id, String title, String dueDate,
+                             String priority, boolean isCompleted) {
+        View taskView = LayoutInflater.from(this)
+                .inflate(R.layout.item_task, taskContainer, false);
+
+        TextView tvTitle = taskView.findViewById(R.id.tvTaskTitle);
+        TextView tvDue = taskView.findViewById(R.id.tvTaskDue);
+        TextView tvPriority = taskView.findViewById(R.id.tvTaskPriority);
+        Button btnComplete = taskView.findViewById(R.id.btnCompleteTask);
+
+        tvTitle.setText(title);
+        tvDue.setText("Due: " + dueDate);
+        tvPriority.setText(priority.toUpperCase());
+
+        if (isCompleted) {
+            tvTitle.setPaintFlags(tvTitle.getPaintFlags() |
+                    android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+            btnComplete.setText("âœ“ Done");
+            btnComplete.setEnabled(false);
+            btnComplete.getBackground().setTint(0xFF4CAF50);
+        } else {
+            btnComplete.setText("Mark Done");
+            btnComplete.setOnClickListener(v -> completeTask(id));
+        }
+
+        switch (priority.toLowerCase()) {
+            case "high":
+                tvPriority.setTextColor(0xFFFF5252);
+                break;
+            case "medium":
+                tvPriority.setTextColor(0xFFFFAB76);
+                break;
+            case "low":
+                tvPriority.setTextColor(0xFF69F0AE);
+                break;
+        }
+
+        taskContainer.addView(taskView);
+    }
+
+    private void completeTask(int taskId) {
+        ApiClient.getService().completeTask(token, taskId)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call,
+                                           Response<ResponseBody> response) {
+                        mainHandler.post(() -> {
+                            if (response.isSuccessful()) {
+                                Toast.makeText(PlannerActivity.this,
+                                        "Task completed! ðŸŽ‰",
+                                        Toast.LENGTH_SHORT).show();
+                                loadTasks();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        mainHandler.post(() ->
+                                Toast.makeText(PlannerActivity.this,
+                                        "Failed!", Toast.LENGTH_SHORT).show());
+                    }
+                });
+    }
+
+    private void getAiPlan() {
+        Toast.makeText(this, "Generating AI plan... â³",
+                Toast.LENGTH_SHORT).show();
+
+        ApiClient.getService().getAiPlan(token)
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call,
+                                           Response<ResponseBody> response) {
+                        mainHandler.post(() -> {
+                            try {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    String json = response.body().string();
+                                    JSONObject obj = new JSONObject(json);
+                                    String plan = obj.getString("ai_study_plan");
+
+                                    new AlertDialog.Builder(PlannerActivity.this)
+                                            .setTitle("ðŸ¤– Your AI Study Plan")
+                                            .setMessage(plan)
+                                            .setPositiveButton("Got it!", null)
+                                            .show();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Toast.makeText(PlannerActivity.this,
+                                        "Error getting plan",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        mainHandler.post(() ->
+                                Toast.makeText(PlannerActivity.this,
+                                        "Failed to get plan!",
+                                        Toast.LENGTH_SHORT).show());
+                    }
+                });
+    }
+
+    private void showAddTaskDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add New Task");
+
+        View dialogView = LayoutInflater.from(this)
+                .inflate(R.layout.dialog_add_task, null);
+        builder.setView(dialogView);
+
+        EditText etTitle = dialogView.findViewById(R.id.etTaskTitle);
+        EditText etDesc = dialogView.findViewById(R.id.etTaskDesc);
+        EditText etDate = dialogView.findViewById(R.id.etTaskDate);
+        EditText etPriority = dialogView.findViewById(R.id.etTaskPriority);
+
+        builder.setPositiveButton("Add", (dialog, which) -> {
+            String title = etTitle.getText().toString().trim();
+            String desc = etDesc.getText().toString().trim();
+            String date = etDate.getText().toString().trim();
+            String priority = etPriority.getText().toString().trim().toLowerCase();
+
+            if (title.isEmpty() || date.isEmpty()) {
+                Toast.makeText(this, "Title and date required!",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (!priority.equals("high") && !priority.equals("medium")
+                    && !priority.equals("low")) {
+                priority = "medium";
+            }
+
+            addTask(title, desc, date, priority);
+        });
+
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+    private void addTask(String title, String desc, String date, String priority) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("title", title);
+            json.put("description", desc);
+            json.put("due_date", date);
+            json.put("priority", priority);
+
+            RequestBody body = RequestBody.create(
+                    MediaType.parse("application/json"),
+                    json.toString()
+            );
+
+            ApiClient.getService().addTask(token, body)
+                    .enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call,
+                                               Response<ResponseBody> response) {
+                            mainHandler.post(() -> {
+                                if (response.isSuccessful()) {
+                                    Toast.makeText(PlannerActivity.this,
+                                            "Task added! âœ…",
+                                            Toast.LENGTH_SHORT).show();
+                                    loadTasks();
+                                } else {
+                                    Toast.makeText(PlannerActivity.this,
+                                            "Failed to add task",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            mainHandler.post(() ->
+                                    Toast.makeText(PlannerActivity.this,
+                                            "Connection failed!",
+                                            Toast.LENGTH_SHORT).show());
+                        }
+                    });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\ProfileActivity.java =====
+package com.mindmate.app;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ProfileActivity extends AppCompatActivity {
+
+    TextView navChat, navPlanner, navBag, navMemories, navProfile;
+    TextView tvProfileName, tvMotivationTitle;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_profile);
+
+        tvProfileName = findViewById(R.id.tvProfileName);
+        tvMotivationTitle = findViewById(R.id.tvMotivationTitle);
+
+        SharedPreferences prefs = getSharedPreferences("MindMate", MODE_PRIVATE);
+        String name = prefs.getString("name", "Your Name");
+        tvProfileName.setText(name);
+
+        navChat = findViewById(R.id.navChat);
+        navPlanner = findViewById(R.id.navPlanner);
+        navBag = findViewById(R.id.navBag);
+        navMemories = findViewById(R.id.navMemories);
+        navProfile = findViewById(R.id.navProfile);
+
+        navChat.setOnClickListener(v -> { startActivity(new Intent(this, HomeActivity.class)); finish(); });
+        navPlanner.setOnClickListener(v -> { startActivity(new Intent(this, PlannerActivity.class)); finish(); });
+        navBag.setOnClickListener(v -> { startActivity(new Intent(this, BagActivity.class)); finish(); });
+        navMemories.setOnClickListener(v -> { startActivity(new Intent(this, JournalActivity.class)); finish(); });
+
+        // âœ… Memory click = (2): open MemoriesActivity from Profile
+        tvMotivationTitle.setOnClickListener(v -> {
+            startActivity(new Intent(this, MemoriesActivity.class));
+        });
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\RegisterActivity.java =====
+package com.mindmate.app;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.mindmate.app.model.RegisterRequest;
+import com.mindmate.app.network.ApiClient;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class RegisterActivity extends AppCompatActivity {
+
+    EditText etName, etEmail, etPassword;
+    Button btnRegister;
+    TextView tvLogin;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+
+        etName = findViewById(R.id.etName);
+        etEmail = findViewById(R.id.etEmail);
+        etPassword = findViewById(R.id.etPassword);
+        btnRegister = findViewById(R.id.btnRegister);
+        tvLogin = findViewById(R.id.tvLogin);
+
+        btnRegister.setOnClickListener(v -> registerUser());
+        tvLogin.setOnClickListener(v -> finish());
+    }
+
+    private void registerUser() {
+        String name = etName.getText().toString().trim();
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
+
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        btnRegister.setEnabled(false);
+        btnRegister.setText("Registering...");
+
+        RegisterRequest request = new RegisterRequest(name, email, password);
+
+        ApiClient.getService().register(request).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                btnRegister.setEnabled(true);
+                btnRegister.setText("Register");
+
+                if (response.isSuccessful()) {
+                    Toast.makeText(RegisterActivity.this,
+                            "Registered successfully! Please login ðŸŽ‰",
+                            Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                    finish();
+                } else {
+                    Toast.makeText(RegisterActivity.this,
+                            "Email already exists!",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                btnRegister.setEnabled(true);
+                btnRegister.setText("Register");
+                Toast.makeText(RegisterActivity.this,
+                        "Connection failed! Is backend running?",
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+}
+
+===== FILE: app\src\main\java\com\mindmate\app\SplashActivity.java =====
+package com.mindmate.app;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.widget.Button;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class SplashActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_splash);
+
+        Button btnLetsGo = findViewById(R.id.btnLetsGo);
+
+        btnLetsGo.setOnClickListener(v -> {
+            SharedPreferences prefs = getSharedPreferences("MindMate", MODE_PRIVATE);
+            String token = prefs.getString("token", null);
+
+            if (token != null) {
+                startActivity(new Intent(this, HomeActivity.class));
+            } else {
+                startActivity(new Intent(this, LoginActivity.class));
+            }
+            finish();
+        });
+    }
+}
+

@@ -68,7 +68,7 @@ public class LoginActivity extends AppCompatActivity {
                     prefs.edit().putString("token", token).apply();
                     prefs.edit().putString("email", email).apply();
 
-                    Toast.makeText(LoginActivity.this, "Welcome back! 🎉", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Welcome back! ðŸŽ‰", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                     finish();
                 } else {
